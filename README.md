@@ -12,7 +12,7 @@ create user datatables@localhost identified by 'datatables';
 grant all on datatables.* to datatables@localhost;
 ```
 
-##run
+## Run
 
 ### uncomment ```@Scheduled``` annotation in DatatablesApplication class
 ```mvn
