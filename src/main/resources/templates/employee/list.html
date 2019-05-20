@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout (~{::body})}">
+<head>
+    <meta charset="UTF-8">
+    <title>Employees</title>
+</head>
+<body>
+<div class="card border-primary mb-3">
+    <div class="card-header bg-primary text-white">
+        Employees
+    </div>
+    <div class="card-body table-responsive">
+        <table class="table table-striped table-bordered table-sm app-data-table order-column">
+            <thead>
+            <tr>
+                <th>id</th>
+                <th data-class-name="priority">Create Time</th>
+                <th>Update Time</th>
+                <th>Position</th>
+                <th>First Name</th>
+                <th>Last Name</th>
+                <th>Salary</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="employee,iter : ${employees}">
+                <td th:text="${employee.getId()}">id</td>
+                <td th:text="${#dates.format(employee.getCreateTime(), 'yyyy-MM-dd HH:mm:ss')}">Create Time</td>
+                <td th:text="${#dates.format(employee.getUpdateTime(), 'yyyy-MM-dd HH:mm:ss')}">Update Time</td>
+                <td th:text="${employee.getPosition()}">Position</td>
+                <td th:text="${employee.getFirstName()}">Name</td>
+                <td th:text="${employee.getLastName()}">Name</td>
+                <td th:text="${employee.getSalary()}">Name</td>
+            </tr>
+            </tbody>
+            <tfoot>
+            <tr>
+                <th>id</th>
+                <th>Create Time</th>
+                <th>Update Time</th>
+                <th>Position</th>
+                <th>First Name</th>
+                <th>Last Name</th>
+                <th>Salary</th>
+            </tr>
+            </tfoot>
+        </table>
+
+    </div>
+</div>
+</body>
+</html>
