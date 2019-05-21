@@ -3,7 +3,6 @@ package com.example.datatables.present.controller;
 import com.example.datatables.persistence.repository.DepartmentRepository;
 import com.example.datatables.service.impl.DepartmentDataTableService;
 
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,7 +24,6 @@ public class DepartmentController {
 
     @GetMapping("/list")
     public String list(Model model) {
-//        model.addAttribute("departments", departmentRepository.findAll(PageRequest.of(0, 10)));
         model.addAttribute("departments", departmentRepository.findAll());
         return "department/list";
     }
