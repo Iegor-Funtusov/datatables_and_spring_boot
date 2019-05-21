@@ -22,6 +22,7 @@
                 <th>First Name</th>
                 <th>Last Name</th>
                 <th>Salary</th>
+                <th>Department</th>
             </tr>
             </thead>
             <tbody>
@@ -30,9 +31,10 @@
                 <td th:text="${#dates.format(employee.getCreateTime(), 'yyyy-MM-dd HH:mm:ss')}">Create Time</td>
                 <td th:text="${#dates.format(employee.getUpdateTime(), 'yyyy-MM-dd HH:mm:ss')}">Update Time</td>
                 <td th:text="${employee.getPosition()}">Position</td>
-                <td th:text="${employee.getFirstName()}">Name</td>
-                <td th:text="${employee.getLastName()}">Name</td>
-                <td th:text="${employee.getSalary()}">Name</td>
+                <td th:text="${employee.getFirstName()}">FirstName</td>
+                <td th:text="${employee.getLastName()}">LastName</td>
+                <td th:text="${employee.getSalary()}">Salary</td>
+                <td th:text="${employee.getDepartment().getName()}">Name</td>
             </tr>
             </tbody>
             <tfoot>
@@ -44,6 +46,7 @@
                 <th>First Name</th>
                 <th>Last Name</th>
                 <th>Salary</th>
+                <th>Department</th>
             </tr>
             </tfoot>
         </table>
