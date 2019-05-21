@@ -36,14 +36,14 @@ public class DatatablesApplication {
 		SpringApplication.run(DatatablesApplication.class, args);
 	}
 
-//	@Scheduled(fixedRate = 3600000)
+	@Scheduled(fixedRate = 3600000)
 	public void gen() {
-		for (int a = 0; a < 57; a++) {
+		for (int a = 0; a < 17; a++) {
 			Department department = new Department();
 			department.setName(rand());
 			department = departmentRepository.save(department);
 
-			for (int qq = 0; qq < 168; qq++) {
+			for (int qq = 0; qq < 38; qq++) {
 				Employee employee = new Employee();
 				employee.setPosition(Position.WORKER);
 				List<Employee> employees = employeeRepository.findAllByPosition(Position.OWNER);
