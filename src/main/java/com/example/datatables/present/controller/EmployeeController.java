@@ -1,9 +1,6 @@
 package com.example.datatables.present.controller;
 
-import com.example.datatables.persistence.entities.Department;
 import com.example.datatables.persistence.entities.Employee;
-import com.example.datatables.persistence.repository.DepartmentRepository;
-import com.example.datatables.persistence.repository.EmployeeRepository;
 import com.example.datatables.present.container.ColumnDefs;
 import com.example.datatables.present.container.PageDataContainer;
 import com.example.datatables.service.impl.EmployeeDataTableService;
@@ -23,7 +20,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.context.request.WebRequest;
 
 import javax.persistence.criteria.Predicate;
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -63,7 +59,7 @@ public class EmployeeController {
             return getPage(model, container);
         } else {
             container = new PageDataContainer();
-            DataTablesInput dataTablesInput = DataTablesInputUtil.generateDataTablesInput(Arrays.asList("id", "createTime", "updateTime", "firstName", "lastName", "salary", "position", "department.id"), container);
+            DataTablesInput dataTablesInput = generateDataTablesInputByEmployee(container);
             Column column = dataTablesInput.getColumn("department.id");
             column.setSearchValue(String.valueOf(id));
             container.setDataTablesInput(dataTablesInput);
@@ -74,7 +70,7 @@ public class EmployeeController {
     private String getPage(Model model, PageDataContainer container) {
         DataTablesInput dataTablesInput = container.getDataTablesInput();
         if (dataTablesInput == null) {
-            dataTablesInput = DataTablesInputUtil.generateDataTablesInput(Arrays.asList("id", "createTime", "updateTime", "firstName", "lastName", "salary", "position", "department.id"), container);
+            dataTablesInput = generateDataTablesInputByEmployee(container);
         }
         WebRequestUtil.pageDataContainerProcess(container, dataTablesInput);
 
@@ -95,6 +91,10 @@ public class EmployeeController {
         model.addAttribute("pageDataContainer", container);
         model.addAttribute("employees", employees.getData());
         return "employee/list";
+    }
+
+    private DataTablesInput generateDataTablesInputByEmployee(PageDataContainer container) {
+        return DataTablesInputUtil.generateDataTablesInput(Arrays.asList("id", "createTime", "updateTime", "firstName", "lastName", "salary", "position", "department.id"), container);
     }
 
     private Specification<Employee> generateSpecification(String id) {
