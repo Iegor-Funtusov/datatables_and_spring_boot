@@ -13,6 +13,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 
+import javax.annotation.PostConstruct;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Random;
@@ -36,14 +37,15 @@ public class DatatablesApplication {
 		SpringApplication.run(DatatablesApplication.class, args);
 	}
 
-	@Scheduled(fixedRate = 3600000)
+	@PostConstruct
 	public void gen() {
-		for (int a = 0; a < 17; a++) {
+		for (int a = 0; a < 170; a++) {
+
 			Department department = new Department();
 			department.setName(rand());
 			department = departmentRepository.save(department);
 
-			for (int qq = 0; qq < 38; qq++) {
+			for (int qq = 0; qq < 138; qq++) {
 				Employee employee = new Employee();
 				employee.setPosition(Position.WORKER);
 				List<Employee> employees = employeeRepository.findAllByPosition(Position.OWNER);

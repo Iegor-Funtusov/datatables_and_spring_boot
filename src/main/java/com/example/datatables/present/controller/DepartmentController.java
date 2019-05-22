@@ -1,8 +1,12 @@
 package com.example.datatables.present.controller;
 
-import com.example.datatables.persistence.repository.DepartmentRepository;
+import com.example.datatables.persistence.entities.Department;
+import com.example.datatables.present.container.ColumnDefs;
+import com.example.datatables.present.container.PageDataContainer;
 import com.example.datatables.service.impl.DepartmentDataTableService;
-
+import com.example.datatables.utils.DataTablesInputUtil;
+import com.example.datatables.utils.WebRequestUtil;
+import org.springframework.data.jpa.datatables.mapping.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -10,51 +14,51 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.context.request.WebRequest;
 
+import java.util.Arrays;
+
 @Controller
 @RequestMapping("/department")
 public class DepartmentController {
 
-    private final DepartmentRepository departmentRepository;
     private final DepartmentDataTableService departmentDataTableService;
 
-    public DepartmentController(DepartmentRepository departmentRepository, DepartmentDataTableService departmentDataTableService) {
-        this.departmentRepository = departmentRepository;
+    public DepartmentController(DepartmentDataTableService departmentDataTableService) {
         this.departmentDataTableService = departmentDataTableService;
     }
 
     @GetMapping("/list")
     public String list(Model model) {
-        model.addAttribute("departments", departmentRepository.findAll());
-        return "department/list";
+        return getPage(model, new PageDataContainer());
     }
 
-    @PostMapping("/list/data")
+    @PostMapping("/list")
     public String listData(Model model, WebRequest webRequest) {
-        model.addAttribute("departments", departmentRepository.findAll());
+        PageDataContainer container = WebRequestUtil.getPageDataContainerByWebRequest(webRequest);
+        if (container != null) {
+            return getPage(model, container);
+        } else {
+            return getPage(model, new PageDataContainer());
+        }
+    }
+
+    private String getPage(Model model, PageDataContainer container) {
+        DataTablesInput dataTablesInput = container.getDataTablesInput();
+        if (dataTablesInput == null) {
+            dataTablesInput = DataTablesInputUtil.generateDataTablesInput(Arrays.asList("id", "createTime", "updateTime", "name"), container);
+        }
+        WebRequestUtil.pageDataContainerProcess(container, dataTablesInput);
+
+        DataTablesOutput<Department> departments = departmentDataTableService.findAll(dataTablesInput);
+
+        container.setTotalElements(departments.getRecordsTotal());
+        container.setDisplayStart(WebRequestUtil.generateDisplayStart(container));
+        container.setDisplayEnd(WebRequestUtil.generateDisplayEnd(container));
+        container.setColumnDefs(new ColumnDefs(new int[] {0, 4}, false));
+
+        System.out.println("container = " + container.toString());
+
+        model.addAttribute("pageDataContainer", container);
+        model.addAttribute("departments", departments.getData());
         return "department/list";
     }
 }
-
-//input = DataTablesInput(
-// draw=1,
-// start=0,
-// length=10,
-// search=Search(value=, regex=false),
-// order=[Order(column=1, dir=desc)],
-// columns=[
-// Column(data=id, name=, searchable=false, orderable=false, search=Search(value=, regex=false)),
-// Column(data=createTime, name=, searchable=true, orderable=true, search=Search(value=, regex=false)),
-// Column(data=organisation, name=, searchable=true, orderable=true, search=Search(value=, regex=false)),
-// Column(data=receiverIdentifier, name=, searchable=true, orderable=true, search=Search(value=, regex=false)),
-// Column(data=documentStatus, name=, searchable=true, orderable=true, search=Search(value=, regex=false)),
-// Column(data=documentType, name=, searchable=true, orderable=true, search=Search(value=, regex=false)),
-// Column(data=ingoingDocumentFormat, name=, searchable=true, orderable=true, search=Search(value=, regex=false)),
-// Column(data=senderName, name=, searchable=true, orderable=true, search=Search(value=, regex=false))])
-
-
-//out = DataTablesOutput(
-// draw=1,
-// recordsTotal=16,
-// recordsFiltered=16,
-// data=[AbstractCreateUpdateEntity(updateTime=2019-05-10 09:36:22.0), AbstractCreateUpdateEntity(updateTime=2019-05-10 09:36:09.0), AbstractCreateUpdateEntity(updateTime=2019-05-10 09:35:58.0), AbstractCreateUpdateEntity(updateTime=2019-05-10 09:35:43.0), AbstractCreateUpdateEntity(updateTime=2019-05-10 09:35:26.0), AbstractCreateUpdateEntity(updateTime=2019-05-10 09:35:12.0), AbstractCreateUpdateEntity(updateTime=2019-05-10 09:34:50.0), AbstractCreateUpdateEntity(updateTime=2019-05-10 09:34:39.0), AbstractCreateUpdateEntity(updateTime=2019-05-10 09:34:27.0), AbstractCreateUpdateEntity(updateTime=2019-05-10 09:34:08.0)],
-// error=null)

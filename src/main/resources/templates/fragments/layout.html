@@ -75,97 +75,114 @@
 
 <script>
 
-    function dataTableRequest(owner, data, type) {
+    function getAttributeByPageDataContainer(owner) {
+        var pageDataJson = owner.getAttribute('page-data-container');
+        return eval('(' + pageDataJson + ')');
+    }
 
-        switch (type) {
-            case "order":
-                var col = data.col;
-                var dir = data.dir;
-                console.log('Order = ' + col
-                    + ':' + dir);
-                break;
-            case "search":
-                console.log('Search');
-                break;
-            case "length":
-                console.log('Length = ' + data);
-                break;
-            case "page":
-                console.log('Page = ' + data);
-                break;
-        }
+    function dataTableRequest(owner, pdContainer) {
+        pdContainer = JSON.stringify(pdContainer);
+        $('<input>').attr({
+            type: 'hidden',
+            name: 'datatable',
+            value: pdContainer
+        }).appendTo(owner);
+
+        localStorage.setItem('pdContainer', pdContainer);
+
+        var button = document.createElement("button");
+        button.setAttribute('type', 'submit');
+        button.style.visibility='hidden';
+        owner.parentElement.appendChild(button);
+        jQuery(button).trigger("click");
     }
 
     $(document).ready(function () {
 
-        $('table.app-data-table tfoot th').each(function () {
-            var title = $(this).text();
-            $(this).html('<input type="text" class="form-control" placeholder="Search ' + title + '" />');
-        });
+        $('table.app-data-table')
+            .each(
+                function () {
+                    var pdContainer = getAttributeByPageDataContainer(this);
+                    var totalElements = pdContainer.totalElements;
+                    var size = pdContainer.size;
+                    var displayStart = pdContainer.displayStart;
+                    var displayEnd = pdContainer.displayEnd;
+                    var columnDefs = pdContainer.columnDefs;
+                    var orderCol = pdContainer.orderCol;
+                    var orderDir = pdContainer.orderDir;
 
-        var appDataTable = $('table.app-data-table')
-            .DataTable({
+                    $('table.app-data-table tfoot th').each(function (i) {
+                        if (columnDefs.targets.find(function (value) { return value === i }) === undefined) {
+                            var column =  pdContainer.dataTablesInput.columns[i];
+                            if (column.search.value !== '') {
+                                $(this).html('<input type="text" class="form-control" value="'+ pdContainer.search +'"/>');
+                            } else {
+                                var title = $(this).text();
+                                $(this).html('<input type="text" class="form-control" placeholder="Search ' + title + '" />');
+                            }
+                        }
+                    });
 
-                "processing": true,
-                "language": {
-                    "lengthMenu": "Display _MENU_ records per page",
-                    "zeroRecords": "Nothing found - sorry",
-                    "info": "Showing _START_ to _END_ of _TOTAL_ entries",
-                    "infoEmpty": "No records available",
-                    "infoFiltered": ""
-                },
-                // autoFill: {
-                //     columns: ':not(:first-child)'
-                // },
-                // keys: true,
-                fixedHeader: {
-                    footer: true
-                },
-                // rowGroup: {
-                //     startRender: null,
-                //     endRender: function ( rows, group ) {
-                //         var avg = rows
-                //             .data()
-                //             .pluck(6)
-                //             .reduce( function (a, b) {
-                //                 return a + b.replace(/[^\d]/g, '')*1;
-                //             }, 0) / rows.count();
-                //
-                //         return 'Average salary in '+group+': '+
-                //             $.fn.dataTable.render.number(',', '.', 0, '$').display( avg );
-                //     },
-                //     dataSrc: 7
-                // },
-                colReorder: true,
-                buttons: ['copy', 'excel', 'pdf', 'csv', 'colvis'],
-                stateSave: true,
-                dom: '<"d-flex justify-content-between"Bl>t<"d-flex justify-content-between"ip><"clear">'
+                    var appDataTable = $(this)
+                        .DataTable(
+                            {
+                                dom: '<"d-flex justify-content-between"Bl>t<"d-flex justify-content-between"ip><"clear">',
+                                pageLength: size,
+                                order: [orderCol, orderDir],
+                                fixedHeader: {
+                                    footer: true
+                                },
+                                colReorder: true,
+                                buttons: ['copy', 'excel', 'pdf', 'csv', 'colvis'],
+                                columnDefs: [{
+                                    "orderable": columnDefs.orderable,
+                                    "searchable": columnDefs.orderable,
+                                    "targets": columnDefs.targets
+                                }],
+                                displayStart: displayStart - 1,
+                                preDrawCallback: function ( settings ) {
+                                    settings.oFeatures.bServerSide = "ssp";
+                                    settings.bDestroying = true;
+                                    settings.fnDisplayEnd = function () {
+                                        return displayEnd;
+                                    };
+                                    settings.fnRecordsTotal = function () {
+                                        return totalElements;
+                                    };
+                                    settings.fnRecordsDisplay = function () {
+                                        return totalElements;
+                                    };
+                                }
+                            })
+                        .on('order.dt', function (e, settings, order) {
+                            pdContainer.orderCol = order[0].col;
+                            pdContainer.orderDir = order[0].dir;
+                            dataTableRequest(this, pdContainer);
+                        })
+                        .on('length.dt', function (e, settings, len) {
+                            pdContainer.size = len;
+                            dataTableRequest(this, pdContainer);
+                        })
+                        .on('page.dt', function () {
+                            pdContainer.page = appDataTable.page.info().page + 1;
+                            dataTableRequest(this, pdContainer);
+                        });
 
-            })
-            .on('order.dt', function (e, settings, order) { dataTableRequest(this, order[0], "order"); })
-            .on('search.dt', function () { dataTableRequest(this, null, "search"); })
-            .on('length.dt', function (e, settings, len) { dataTableRequest(this, len, "length"); })
-            .on('page.dt', function () { var page = appDataTable.page.info().page + 1; dataTableRequest(this, page, "page"); })
-        ;
+                    appDataTable.columns().every(function (i) {
+                        var that = this;
+                        $('input', this.footer()).on('keyup change', function () {
+                            if (that.search() !== this.value) {
+                                pdContainer.dataTablesInput.columns[i].search.value = this.value;
+                                pdContainer.dataTablesInput.columns[i].search.regex = true;
+                                dataTableRequest(this, pdContainer);
+                            }
+                        });
+                    });
 
-        console.log('api = ' + JSON.stringify(appDataTable.page.info()));
+                    appDataTable.buttons().container()
+                        .appendTo('table.app-data-table_wrapper .col-sm-6:eq(0)');
 
-        appDataTable.columns().every(function () {
-            var that = this;
-
-            $('input', this.footer()).on('keyup change', function () {
-                if (that.search() !== this.value) {
-                    console.log(this.value);
-                    that
-                        .search(this.value)
-                        .draw();
-                }
-            });
-        });
-
-        appDataTable.buttons().container()
-            .appendTo('table.app-data-table_wrapper .col-sm-6:eq(0)');
-
+                });
     });
 </script>
 </body>
