@@ -5,40 +5,20 @@
 <head>
     <meta charset="utf-8">
     <meta name="context-path" th:content="${#request.contextPath}"/>
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
     <!-- add bootstrap 4 -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     <!-- add datatables -->
-    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.18/css/dataTables.bootstrap4.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.19/css/dataTables.bootstrap4.min.css">
     <!-- add datatables buttons plugin -->
     <link rel="stylesheet" href="https://cdn.datatables.net/buttons/1.5.6/css/buttons.bootstrap4.min.css">
     <!-- add datatables fixedHeader plugin -->
-    <link rel="stylesheet" href="https://cdn.datatables.net/fixedheader/3.1.4/css/fixedHeader.bootstrap4.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/fixedheader/3.1.5/css/fixedHeader.bootstrap4.min.css">
+    <link rel="stylesheet" type="text/css" th:href="@{/css/main.css?v=__${'1.01'}__}">
 
     <title>Datatables</title>
-
-    <style>
-
-        card {
-            word-break: break-all !important;
-        }
-
-        table {
-            border-radius: 0.25rem;
-        }
-
-        tfoot input {
-            width: 100%;
-            padding: 3px;
-            box-sizing: border-box;
-        }
-
-        tfoot {
-            display: table-header-group;
-        }
-    </style>
 
 </head>
 <body>
@@ -96,7 +76,7 @@
 <script src="https://cdn.datatables.net/buttons/1.5.6/js/buttons.print.min.js" type="text/javascript"></script>
 
 <!-- add datatables fixedHeader plugin -->
-<script src="https://cdn.datatables.net/fixedheader/3.1.4/js/dataTables.fixedHeader.min.js" type="text/javascript"></script>
+<script src="https://cdn.datatables.net/fixedheader/3.1.5/js/dataTables.fixedHeader.min.js" type="text/javascript"></script>
 
 <script>
 
@@ -151,10 +131,10 @@
                     var appDataTable = $(this)
                         .DataTable(
                             {
+                                fixedHeader: true,
                                 pageLength: size,
                                 pagingType: "full",
                                 order: [orderCol, orderDir],
-                                fixedHeader: true,
                                 buttons: [
                                     'colvis',
                                     'copyHtml5',
@@ -169,7 +149,7 @@
                                     "targets": columnDefs.targets
                                 }],
                                 displayStart: displayStart - 1,
-                                dom: '<"d-flex justify-content-between"Bl>t<"d-flex justify-content-between"ip><"clear">',
+                                dom: '<"dom_wrapper fh-fixedHeader"<"d-flex justify-content-between"Bl>>t<"d-flex justify-content-between"ip><"clear">',
                                 preDrawCallback: function (settings) {
                                     settings.oFeatures.bServerSide = "ssp";
                                     settings.bDestroying = true;
