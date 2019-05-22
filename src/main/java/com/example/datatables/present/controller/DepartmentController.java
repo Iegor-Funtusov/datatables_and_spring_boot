@@ -47,15 +47,11 @@ public class DepartmentController {
             dataTablesInput = DataTablesInputUtil.generateDataTablesInput(Arrays.asList("id", "createTime", "updateTime", "name"), container);
         }
         WebRequestUtil.pageDataContainerProcess(container, dataTablesInput);
-
         DataTablesOutput<Department> departments = departmentDataTableService.findAll(dataTablesInput);
-
         container.setTotalElements(departments.getRecordsTotal());
         container.setDisplayStart(WebRequestUtil.generateDisplayStart(container));
         container.setDisplayEnd(WebRequestUtil.generateDisplayEnd(container));
         container.setColumnDefs(new ColumnDefs(new int[] {0, 4}, false));
-
-        System.out.println("container = " + container.toString());
 
         model.addAttribute("pageDataContainer", container);
         model.addAttribute("departments", departments.getData());

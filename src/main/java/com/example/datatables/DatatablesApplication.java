@@ -10,15 +10,12 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.data.jpa.datatables.repository.DataTablesRepositoryFactoryBean;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
-import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.scheduling.annotation.Scheduled;
 
 import javax.annotation.PostConstruct;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Random;
 
-@EnableScheduling
 @SpringBootApplication
 @EnableJpaRepositories(repositoryFactoryBeanClass = DataTablesRepositoryFactoryBean.class, basePackages = "com.example.datatables.persistence.repository")
 public class DatatablesApplication {
@@ -37,7 +34,7 @@ public class DatatablesApplication {
 		SpringApplication.run(DatatablesApplication.class, args);
 	}
 
-	@PostConstruct
+//	@PostConstruct
 	public void gen() {
 		for (int a = 0; a < 170; a++) {
 

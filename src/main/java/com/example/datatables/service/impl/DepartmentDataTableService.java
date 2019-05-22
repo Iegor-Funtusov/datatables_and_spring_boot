@@ -6,6 +6,7 @@ import com.example.datatables.service.AbstractDataTableService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
 import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 @Slf4j
@@ -21,5 +22,10 @@ public class DepartmentDataTableService implements AbstractDataTableService<Depa
     @Override
     public DataTablesOutput<Department> findAll(DataTablesInput input) {
         return departmentDataTableRepository.findAll(input);
+    }
+
+    @Override
+    public DataTablesOutput<Department> findAll(DataTablesInput input, Specification<Department> specification) {
+        return null;
     }
 }

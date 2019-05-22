@@ -126,10 +126,10 @@
                     var appDataTable = $(this)
                         .DataTable(
                             {
-                                dom: '<"d-flex justify-content-between"Bl>t<"d-flex justify-content-between"ip><"clear">',
                                 pageLength: size,
                                 order: [orderCol, orderDir],
                                 fixedHeader: {
+                                    header: true,
                                     footer: true
                                 },
                                 colReorder: true,
@@ -140,6 +140,7 @@
                                     "targets": columnDefs.targets
                                 }],
                                 displayStart: displayStart - 1,
+                                dom: '<"d-flex justify-content-between"Bl>t<"d-flex justify-content-between"ip><"clear">',
                                 preDrawCallback: function ( settings ) {
                                     settings.oFeatures.bServerSide = "ssp";
                                     settings.bDestroying = true;
