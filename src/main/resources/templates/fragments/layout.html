@@ -8,6 +8,8 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
+    <link rel="shortcut icon" type="image/png" href="https://raw.githubusercontent.com/DataTables/DataTables/master/media/images/favicon.ico"/>
+
     <!-- add bootstrap 4 -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     <!-- add datatables -->
@@ -20,7 +22,7 @@
     <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.2.2/css/responsive.bootstrap4.min.css">
     <!-- add datatables colReorder plugin -->
     <link rel="stylesheet" href="https://cdn.datatables.net/colreorder/1.5.0/css/colReorder.bootstrap4.min.css">
-    <link rel="stylesheet" type="text/css" th:href="@{/css/main.css?v=__${'1.01'}__}">
+    <link rel="stylesheet" type="text/css" th:href="@{/css/main.css?v=__${'1.03'}__}">
 
     <title>Datatables</title>
 
@@ -207,6 +209,22 @@
 
                     new $.fn.dataTable.FixedHeader( appDataTable, {
                         headerOffset: 1
+                    } );
+
+                    $('table.app-data-table tbody').on('click', 'td.details-control', function () {
+                        var tr = $(this).closest('tr');
+                        var row = appDataTable.row( tr );
+
+                        if ( row.child.isShown() ) {
+                            // This row is already open - close it
+                            row.child.hide();
+                            tr.removeClass('shown');
+                        }
+                        else {
+                            // Open this row
+                            row.child( format(row.data()) ).show();
+                            tr.addClass('shown');
+                        }
                     } );
 
                 });

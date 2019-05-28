@@ -25,14 +25,12 @@
                 </tr>
                 </thead>
                 <tbody>
-                <tr th:each="department,iter : ${departments}">
+                <tr th:each="department,iter : ${departments}" role="row" class="odd">
                     <td th:text="${department.getId()}">id</td>
                     <td th:text="${#dates.format(department.getCreateTime(), 'yyyy-MM-dd HH:mm:ss')}">Create Time</td>
                     <td th:text="${#dates.format(department.getUpdateTime(), 'yyyy-MM-dd HH:mm:ss')}">Update Time</td>
                     <td th:text="${department.getName()}">Name</td>
-                    <td>
-                        <a href="#" th:href="@{/employee/list/__${department.id}__}" th:text="Employees">Employees</a>
-                    </td>
+                    <td class="details-control"></td>
                 </tr>
                 </tbody>
 <!--                <tfoot>-->
@@ -48,5 +46,18 @@
         </form>
     </div>
 </div>
+
+<script >
+    function format ( d ) {
+        d = String(d);
+        var id = d.substring(0, d.indexOf(','));
+        return '<table cellpadding="5" cellspacing="0" border="0" style="padding-left:50px;">'+
+            '<tr>'+
+            '<td>Link:</td>'+
+            '<td>'+'<a href="[[@{/employee/list/}]]' + id + '">' + 'Employees' + '</a>'+'</td>'+
+            '</tr>'+
+            '</table>';
+    }
+</script>
 </body>
 </html>
