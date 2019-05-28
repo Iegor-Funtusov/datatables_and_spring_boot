@@ -134,17 +134,21 @@
                     var orderCol = pdContainer.orderCol;
                     var orderDir = pdContainer.orderDir;
 
-                    // $('table.app-data-table tfoot th').each(function (i) {
-                    //     if (columnDefs.targets.find(function (value) { return value === i }) === undefined) {
-                    //         var column =  pdContainer.dataTablesInput.columns[i];
-                    //         if (column.search.value !== '') {
-                    //             $(this).html('<input type="text" class="form-control" value="'+ pdContainer.search +'"/>');
-                    //         } else {
-                    //             var title = $(this).text();
-                    //             $(this).html('<input type="text" class="form-control" placeholder="Search ' + title + '" />');
-                    //         }
-                    //     }
-                    // });
+                    $('table.app-data-table tfoot th').each(function (i) {
+                        var column =  pdContainer.dataTablesInput.columns[i];
+                        // console.log('col = ' + JSON.stringify(column));
+                        if (column !== undefined) {
+                            if (column.searchable) {
+                                var search = column.search.value;
+                                if (search !== '') {
+                                    $(this).html('<input type="text" class="form-control" value="'+ search +'"/>');
+                                } else {
+                                    var title = $(this).text();
+                                    $(this).html('<input type="text" class="form-control" placeholder="Search ' + title + '" />');
+                                }
+                            }
+                        }
+                    });
 
                     var appDataTable = $(this)
                         .DataTable(
@@ -197,24 +201,25 @@
                             dataTableRequest(this, pdContainer);
                         });
 
-                    // appDataTable.columns().every(function (i) {
-                    //     var that = this;
-                    //     $('input', this.footer()).on('keyup change', function () {
-                    //         if (that.search() !== this.value) {
-                    //             pdContainer.dataTablesInput.columns[i].search.value = this.value;
-                    //             pdContainer.dataTablesInput.columns[i].search.regex = true;
-                    //             dataTableRequest(this, pdContainer);
-                    //         }
-                    //     });
-                    // });
-
+                    appDataTable.columns().every(function (i) {
+                        $('input', this.footer()).on('keypress', function (event) {
+                            if (event.keyCode === 13) {
+                                pdContainer.dataTablesInput.columns[i].search.value = this.value;
+                                pdContainer.dataTablesInput.columns[i].search.regex = true;
+                                pdContainer.dataTablesInput.columnsAsMap = null;
+                                dataTableRequest(this, pdContainer);
+                            }
+                        });
+                    });
 
                     appDataTable.buttons().container()
                         .appendTo('table.app-data-table_wrapper .col-sm-6:eq(0)');
 
 
                     new $.fn.dataTable.FixedHeader( appDataTable, {
-                        headerOffset: 1
+                        headerOffset: 1,
+                        footer: true,
+                        footerOffset: 1
                     } );
 
                     $('table.app-data-table tbody').on('click', 'td.details-control', function () {

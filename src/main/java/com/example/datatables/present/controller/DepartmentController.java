@@ -48,7 +48,7 @@ public class DepartmentController {
         }
         WebRequestUtil.pageDataContainerProcess(container, dataTablesInput);
         DataTablesOutput<Department> departments = departmentDataTableService.findAll(dataTablesInput);
-        container.setTotalElements(departments.getRecordsTotal());
+        container.setTotalElements(departments.getRecordsFiltered());
         container.setDisplayStart(WebRequestUtil.generateDisplayStart(container));
         container.setDisplayEnd(WebRequestUtil.generateDisplayEnd(container));
         container.setColumnDefs(new ColumnDefs(new int[] {0, 4}, false));
