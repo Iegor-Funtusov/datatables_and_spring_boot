@@ -91,6 +91,9 @@
 <!-- add datatables colReorder plugin -->
 <script src="https://cdn.datatables.net/colreorder/1.5.0/js/dataTables.colReorder.min.js" type="text/javascript"></script>
 
+<!-- add colResizable -->
+<script src="https://cdn.jsdelivr.net/npm/colresizable@1.6.0/colResizable-1.6.min.js" type="text/javascript"></script>
+
 <script>
 
     function getAttributeByPageDataContainer(owner) {
@@ -116,6 +119,10 @@
     }
 
     $(document).ready(function () {
+
+        $(function(){
+            $('table.app-data-table').colResizable();
+        });
 
         $('table.app-data-table')
             .each(
@@ -164,6 +171,9 @@
                                 }],
                                 displayStart: displayStart - 1,
                                 dom: '<"dom_wrapper fh-fixedHeader"<"d-flex justify-content-between"Bl>>t<"d-flex justify-content-between"ip><"clear">',
+                                initComplete: function(settings) {
+                                    $('table.app-data-table').colResizable({liveDrag:true});
+                                },
                                 preDrawCallback: function (settings) {
                                     settings.oFeatures.bServerSide = "ssp";
                                     settings.bDestroying = true;
@@ -202,6 +212,7 @@
                     //         }
                     //     });
                     // });
+
 
                     appDataTable.buttons().container()
                         .appendTo('table.app-data-table_wrapper .col-sm-6:eq(0)');

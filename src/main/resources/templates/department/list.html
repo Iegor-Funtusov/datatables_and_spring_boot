@@ -21,7 +21,7 @@
                     <th>Create Time</th>
                     <th>Update Time</th>
                     <th data-class-name="priority">Name</th>
-                    <th>Employees</th>
+                    <th></th>
                 </tr>
                 </thead>
                 <tbody>
@@ -49,8 +49,7 @@
 
 <script >
     function format ( d ) {
-        d = String(d);
-        var id = d.substring(0, d.indexOf(','));
+        var id = String(d).split(',')[0];
         return '<table cellpadding="5" cellspacing="0" border="0" style="padding-left:50px;">'+
             '<tr>'+
             '<td>Link:</td>'+
