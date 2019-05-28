@@ -36,7 +36,7 @@ public class DatatablesApplication {
 
 //	@PostConstruct
 	public void gen() {
-		for (int a = 0; a < 170; a++) {
+		for (int a = 0; a < 174; a++) {
 
 			Department department = new Department();
 			department.setName(rand());

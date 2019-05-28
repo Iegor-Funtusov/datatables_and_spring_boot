@@ -131,7 +131,6 @@
                     var appDataTable = $(this)
                         .DataTable(
                             {
-                                fixedHeader: true,
                                 pageLength: size,
                                 pagingType: "full",
                                 order: [orderCol, orderDir],
@@ -191,6 +190,13 @@
 
                     appDataTable.buttons().container()
                         .appendTo('table.app-data-table_wrapper .col-sm-6:eq(0)');
+
+                    new $.fn.dataTable.FixedHeader( appDataTable, {
+                        // options
+                        fixedHeader: {
+                            header: true
+                        }
+                    } );
 
                 });
     });
