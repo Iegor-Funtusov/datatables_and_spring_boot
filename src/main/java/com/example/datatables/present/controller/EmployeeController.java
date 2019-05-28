@@ -73,14 +73,7 @@ public class EmployeeController {
             dataTablesInput = generateDataTablesInputByEmployee(container);
         }
         DataTablesUtil.pageDataContainerProcess(container, dataTablesInput);
-
-        Column column = container.getDataTablesInput().getColumn("department.id");
-        DataTablesOutput<Employee> employees;
-        if (column.getSearch().getValue().equals("")) {
-            employees = employeeDataTableService.findAll(dataTablesInput);
-        } else {
-            employees = employeeDataTableService.findAll(dataTablesInput, generateSpecification(column.getSearch().getValue()));
-        }
+        DataTablesOutput<Employee> employees = employeeDataTableService.findAll(dataTablesInput);
         DataTablesUtil.pageDataContainerProcessFinish(container, employees);
         container.setColumnDefs(new ColumnDefs(new int[] { 0 }, false));
 
