@@ -4,7 +4,7 @@ import com.example.datatables.persistence.entities.Department;
 import com.example.datatables.present.container.ColumnDefs;
 import com.example.datatables.present.container.PageDataContainer;
 import com.example.datatables.service.impl.DepartmentDataTableService;
-import com.example.datatables.utils.DataTablesInputUtil;
+import com.example.datatables.utils.DataTablesUtil;
 import com.example.datatables.utils.WebRequestUtil;
 import org.springframework.data.jpa.datatables.mapping.*;
 import org.springframework.stereotype.Controller;
@@ -44,13 +44,11 @@ public class DepartmentController {
     private String getPage(Model model, PageDataContainer container) {
         DataTablesInput dataTablesInput = container.getDataTablesInput();
         if (dataTablesInput == null) {
-            dataTablesInput = DataTablesInputUtil.generateDataTablesInput(Arrays.asList("id", "createTime", "updateTime", "name"), container);
+            dataTablesInput = DataTablesUtil.generateDataTablesInput(Arrays.asList("id", "createTime", "updateTime", "name"), container);
         }
-        WebRequestUtil.pageDataContainerProcess(container, dataTablesInput);
+        DataTablesUtil.pageDataContainerProcess(container, dataTablesInput);
         DataTablesOutput<Department> departments = departmentDataTableService.findAll(dataTablesInput);
-        container.setTotalElements(departments.getRecordsFiltered());
-        container.setDisplayStart(WebRequestUtil.generateDisplayStart(container));
-        container.setDisplayEnd(WebRequestUtil.generateDisplayEnd(container));
+        DataTablesUtil.pageDataContainerProcessFinish(container, departments);
         container.setColumnDefs(new ColumnDefs(new int[] {0, 4}, false));
 
         model.addAttribute("pageDataContainer", container);

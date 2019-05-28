@@ -4,7 +4,7 @@ import com.example.datatables.persistence.entities.Employee;
 import com.example.datatables.present.container.ColumnDefs;
 import com.example.datatables.present.container.PageDataContainer;
 import com.example.datatables.service.impl.EmployeeDataTableService;
-import com.example.datatables.utils.DataTablesInputUtil;
+import com.example.datatables.utils.DataTablesUtil;
 import com.example.datatables.utils.WebRequestUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.jpa.datatables.mapping.Column;
@@ -72,20 +72,16 @@ public class EmployeeController {
         if (dataTablesInput == null) {
             dataTablesInput = generateDataTablesInputByEmployee(container);
         }
-        WebRequestUtil.pageDataContainerProcess(container, dataTablesInput);
+        DataTablesUtil.pageDataContainerProcess(container, dataTablesInput);
 
         Column column = container.getDataTablesInput().getColumn("department.id");
         DataTablesOutput<Employee> employees;
         if (column.getSearch().getValue().equals("")) {
             employees = employeeDataTableService.findAll(dataTablesInput);
-            container.setTotalElements(employees.getRecordsFiltered());
         } else {
             employees = employeeDataTableService.findAll(dataTablesInput, generateSpecification(column.getSearch().getValue()));
-            container.setTotalElements(employees.getRecordsFiltered());
         }
-
-        container.setDisplayStart(WebRequestUtil.generateDisplayStart(container));
-        container.setDisplayEnd(WebRequestUtil.generateDisplayEnd(container));
+        DataTablesUtil.pageDataContainerProcessFinish(container, employees);
         container.setColumnDefs(new ColumnDefs(new int[] { 0 }, false));
 
         model.addAttribute("pageDataContainer", container);
@@ -94,7 +90,7 @@ public class EmployeeController {
     }
 
     private DataTablesInput generateDataTablesInputByEmployee(PageDataContainer container) {
-        return DataTablesInputUtil.generateDataTablesInput(Arrays.asList("id", "createTime", "updateTime", "position", "firstName", "lastName", "salary", "department.id"), container);
+        return DataTablesUtil.generateDataTablesInput(Arrays.asList("id", "createTime", "updateTime", "position", "firstName", "lastName", "salary", "department.id"), container);
     }
 
     private Specification<Employee> generateSpecification(String id) {
