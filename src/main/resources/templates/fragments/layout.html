@@ -171,9 +171,6 @@
                                 }],
                                 displayStart: displayStart - 1,
                                 dom: '<"dom_wrapper fh-fixedHeader"<"d-flex justify-content-between"Bl>>t<"d-flex justify-content-between"ip><"clear">',
-                                initComplete: function(settings) {
-                                    $('table.app-data-table').colResizable({liveDrag:true});
-                                },
                                 preDrawCallback: function (settings) {
                                     settings.oFeatures.bServerSide = "ssp";
                                     settings.bDestroying = true;
