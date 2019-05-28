@@ -19,7 +19,6 @@ public class PageDataContainer implements Serializable {
     private int orderCol = 1;
     private String orderDir = "desc";
 
-    private String search = null;
     private ColumnDefs columnDefs = new ColumnDefs();
     private DataTablesInput dataTablesInput = null;
 }
