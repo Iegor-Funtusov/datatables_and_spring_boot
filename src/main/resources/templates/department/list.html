@@ -35,10 +35,11 @@
                 </tbody>
                 <tfoot>
                 <tr>
-                    <th>id</th>
-                    <th>Create Time</th>
-                    <th>Update Time</th>
-                    <th>Name</th>
+                    <th th:each="data : ${pageDataContainer.dataTablesInput.columns}">
+                        <th:block th:if="${data.searchable}">
+                            <input type="text" class="form-control" th:value="${data.search.value}"/>
+                        </th:block>
+                    </th>
                     <th></th>
                 </tr>
                 </tfoot>
