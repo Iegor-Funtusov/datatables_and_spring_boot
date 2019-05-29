@@ -41,9 +41,20 @@
             </tbody>
             <tfoot>
             <tr>
-                <th th:each="data : ${pageDataContainer.dataTablesInput.columns}">
-                    <th:block th:if="${data.searchable}">
-                        <input type="text" class="form-control" th:value="${data.search.value}"/>
+                <th th:each="column : ${pageDataContainer.dataTablesInput.columns}">
+                    <th:block th:if="${column.searchable}">
+                        <th:block th:switch="${column.data != 'position'}">
+                            <div th:case="${true}">
+                                <input type="text" class="form-control" th:value="${column.search.value}" th:placeholder="${column.data}"/>
+                            </div>
+                            <div th:case="${false}">
+                                <select class="form-control" style="min-width: 100px">
+                                    <option th:each="position : ${positions}"
+                                            th:value="${position}"
+                                            th:text="${position}"></option>
+                                </select>
+                            </div>
+                        </th:block>
                     </th:block>
                 </th>
             </tr>

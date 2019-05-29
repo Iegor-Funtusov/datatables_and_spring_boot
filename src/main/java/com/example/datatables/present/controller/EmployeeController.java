@@ -1,6 +1,7 @@
 package com.example.datatables.present.controller;
 
 import com.example.datatables.persistence.entities.Employee;
+import com.example.datatables.persistence.enums.Position;
 import com.example.datatables.present.container.ColumnDefs;
 import com.example.datatables.present.container.PageDataContainer;
 import com.example.datatables.service.impl.EmployeeDataTableService;
@@ -79,6 +80,7 @@ public class EmployeeController {
 
         model.addAttribute("pageDataContainer", container);
         model.addAttribute("employees", employees.getData());
+        model.addAttribute("positions", Position.values());
         return "employee/list";
     }
 

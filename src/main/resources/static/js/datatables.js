@@ -90,12 +90,22 @@ $(document).ready(function () {
                 appDataTable.columns().every(function (i) {
                     $('input', this.footer()).on('keypress', function (event) {
                         if (event.keyCode === 13) {
-                            console.log('this = ' + this.value);
                             pdContainer.dataTablesInput.columns[i].search.value = this.value;
                             pdContainer.dataTablesInput.columns[i].search.regex = true;
                             pdContainer.dataTablesInput.columnsAsMap = null;
                             dataTableRequest(this, pdContainer);
                         }
+                    });
+                });
+
+                appDataTable.columns().every(function (i) {
+                    $('select', this.footer()).on('change', function (event) {
+                        pdContainer.dataTablesInput.columns[i].search.value = $.fn.dataTable.util.escapeRegex(
+                            $(this).val()
+                        );
+                        pdContainer.dataTablesInput.columns[i].search.regex = true;
+                        pdContainer.dataTablesInput.columnsAsMap = null;
+                        dataTableRequest(this, pdContainer);
                     });
                 });
 

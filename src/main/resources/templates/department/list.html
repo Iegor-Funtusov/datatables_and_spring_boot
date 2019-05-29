@@ -35,9 +35,9 @@
                 </tbody>
                 <tfoot>
                 <tr>
-                    <th th:each="data : ${pageDataContainer.dataTablesInput.columns}">
-                        <th:block th:if="${data.searchable}">
-                            <input type="text" class="form-control" th:value="${data.search.value}"/>
+                    <th th:each="column : ${pageDataContainer.dataTablesInput.columns}">
+                        <th:block th:if="${column.searchable}">
+                            <input type="text" class="form-control" th:value="${column.search.value}"/>
                         </th:block>
                     </th>
                     <th></th>
