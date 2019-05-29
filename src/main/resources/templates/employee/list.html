@@ -19,7 +19,6 @@
             <tr>
                 <th>id</th>
                 <th data-class-name="priority">Create Time</th>
-                <th>Update Time</th>
                 <th>Position</th>
                 <th>First Name</th>
                 <th>Last Name</th>
@@ -31,7 +30,6 @@
             <tr th:each="employee,iter : ${employees}">
                 <td th:text="${employee.getId()}">id</td>
                 <td th:text="${#dates.format(employee.getCreateTime(), 'yyyy-MM-dd HH:mm:ss')}">Create Time</td>
-                <td th:text="${#dates.format(employee.getUpdateTime(), 'yyyy-MM-dd HH:mm:ss')}">Update Time</td>
                 <td th:text="${employee.getPosition()}">Position</td>
                 <td th:text="${employee.getFirstName()}">FirstName</td>
                 <td th:text="${employee.getLastName()}">LastName</td>
@@ -43,16 +41,28 @@
             <tr>
                 <th th:each="column : ${pageDataContainer.dataTablesInput.columns}">
                     <th:block th:if="${column.searchable}">
-                        <th:block th:switch="${column.data != 'position'}">
-                            <div th:case="${true}">
-                                <input type="text" class="form-control" th:value="${column.search.value}" th:placeholder="${column.data}"/>
-                            </div>
-                            <div th:case="${false}">
-                                <select class="form-control" style="min-width: 100px">
+                        <th:block th:switch="${column.data}">
+                            <div th:case="${'position'}">
+                                <select class="form-control" style="min-width: 100px" >
                                     <option th:each="position : ${positions}"
-                                            th:value="${position}"
-                                            th:text="${position}"></option>
+                                            th:value="${position.name()}"
+                                            th:text="${position.name()}"
+                                            th:selected="${column.search.value == position.name()}">
+                                    </option>
                                 </select>
+                            </div>
+                            <div th:case="${'createTime'}">
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text" id="reportrange">
+                                            <i class="fa fa-calendar"></i>
+                                        </span>
+                                    </div>
+                                    <input type="text" name="createTime" class="form-control" th:value="${column.search.value}" th:placeholder="${column.data}" aria-describedby="reportrange">
+                                </div>
+                            </div>
+                            <div th:case="*">
+                                <input type="text" class="form-control" th:value="${column.search.value}" th:placeholder="${column.data}"/>
                             </div>
                         </th:block>
                     </th:block>

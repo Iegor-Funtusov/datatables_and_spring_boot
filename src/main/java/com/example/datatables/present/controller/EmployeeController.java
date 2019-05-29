@@ -74,7 +74,16 @@ public class EmployeeController {
             dataTablesInput = generateDataTablesInputByEmployee(container);
         }
         DataTablesUtil.pageDataContainerProcess(container, dataTablesInput);
-        DataTablesOutput<Employee> employees = employeeDataTableService.findAll(dataTablesInput);
+        DataTablesOutput<Employee> employees;
+        Column column = dataTablesInput.getColumn("createTime");
+        String val = column.getSearch().getValue();
+        if (val.equals("")) {
+            employees = employeeDataTableService.findAll(dataTablesInput);
+        } else {
+            System.out.println("val = " + val);
+            employees = employeeDataTableService.findAll(dataTablesInput);
+        }
+
         DataTablesUtil.pageDataContainerProcessFinish(container, employees);
         container.setColumnDefs(new ColumnDefs(new int[] { 0 }, false));
 
@@ -85,7 +94,7 @@ public class EmployeeController {
     }
 
     private DataTablesInput generateDataTablesInputByEmployee(PageDataContainer container) {
-        return DataTablesUtil.generateDataTablesInput(Arrays.asList("id", "createTime", "updateTime", "position", "firstName", "lastName", "salary", "department.id"), container);
+        return DataTablesUtil.generateDataTablesInput(Arrays.asList("id", "createTime", "position", "firstName", "lastName", "salary", "department.id"), container);
     }
 
     private Specification<Employee> generateSpecification(String id) {

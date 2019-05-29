@@ -20,7 +20,7 @@ function dataTableRequest(owner, pdContainer) {
 
 $(document).ready(function () {
 
-    $(function(){
+    $(function() {
         $('table.app-data-table').colResizable();
     });
 
@@ -89,11 +89,27 @@ $(document).ready(function () {
 
                 appDataTable.columns().every(function (i) {
                     $('input', this.footer()).on('keypress', function (event) {
+                        console.log('val = ' + this.value);
                         if (event.keyCode === 13) {
                             pdContainer.dataTablesInput.columns[i].search.value = this.value;
                             pdContainer.dataTablesInput.columns[i].search.regex = true;
                             pdContainer.dataTablesInput.columnsAsMap = null;
                             dataTableRequest(this, pdContainer);
+                        }
+                    });
+                });
+
+                appDataTable.columns().every(function (i) {
+                    $('input', this.footer()).on('change', function (event) {
+                        if (pdContainer.dataTablesInput.columns[i].data === 'createTime') {
+                            // console.log('event = ' + JSON.stringify(event));
+                            console.log('val = ' + this.value)
+                            // pdContainer.dataTablesInput.columns[i].search.value = $.fn.dataTable.util.escapeRegex(
+                            //     $(this).val()
+                            // );
+                            // pdContainer.dataTablesInput.columns[i].search.regex = true;
+                            // pdContainer.dataTablesInput.columnsAsMap = null;
+                            // dataTableRequest(this, pdContainer);
                         }
                     });
                 });
@@ -107,6 +123,23 @@ $(document).ready(function () {
                         pdContainer.dataTablesInput.columnsAsMap = null;
                         dataTableRequest(this, pdContainer);
                     });
+                });
+
+                var start = moment().subtract(29, 'days');
+                var end = moment();
+
+                $('input[name="createTime"]').daterangepicker({
+                    drops: 'up',
+                    startDate: start,
+                    endDate: end,
+                    ranges: {
+                        'Today': [moment(), moment()],
+                        'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+                        'Last 7 Days': [moment().subtract(6, 'days'), moment()],
+                        'Last 30 Days': [moment().subtract(29, 'days'), moment()],
+                        'This Month': [moment().startOf('month'), moment().endOf('month')],
+                        'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+                    }
                 });
 
                 appDataTable.buttons().container()
