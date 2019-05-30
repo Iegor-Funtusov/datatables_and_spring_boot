@@ -1,5 +1,6 @@
 package com.example.datatables.utils;
 
+import com.example.datatables.persistence.entities.AbstractEntity;
 import com.example.datatables.present.container.PageDataContainer;
 import lombok.experimental.UtilityClass;
 import org.apache.commons.lang3.ObjectUtils;
@@ -64,7 +65,7 @@ public class DataTablesUtil {
         container.setDataTablesInput(dataTablesInput);
     }
 
-    public void pageDataContainerProcessFinish(PageDataContainer container, DataTablesOutput output) {
+    public void pageDataContainerProcessFinish(PageDataContainer container, DataTablesOutput<? extends AbstractEntity> output) {
         if (output.getRecordsFiltered() == 0) {
             container.setTotalElements(0);
             container.setDisplayStart(1);
