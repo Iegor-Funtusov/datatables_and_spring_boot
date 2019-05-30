@@ -20,7 +20,7 @@ function dataTableRequest(owner, pdContainer) {
 
 $(document).ready(function () {
 
-    $(function() {
+    $(function () {
         $('table.app-data-table').colResizable();
     });
 
@@ -35,6 +35,8 @@ $(document).ready(function () {
                 var columnDefs = pdContainer.columnDefs;
                 var orderCol = pdContainer.orderCol;
                 var orderDir = pdContainer.orderDir;
+                var createTime = "createTime";
+                var updateTime = "updateTime";
 
                 var appDataTable = $(this)
                     .DataTable(
@@ -89,7 +91,6 @@ $(document).ready(function () {
 
                 appDataTable.columns().every(function (i) {
                     $('input', this.footer()).on('keypress', function (event) {
-                        console.log('val = ' + this.value);
                         if (event.keyCode === 13) {
                             pdContainer.dataTablesInput.columns[i].search.value = this.value;
                             pdContainer.dataTablesInput.columns[i].search.regex = true;
@@ -100,22 +101,7 @@ $(document).ready(function () {
                 });
 
                 appDataTable.columns().every(function (i) {
-                    $('input', this.footer()).on('change', function (event) {
-                        if (pdContainer.dataTablesInput.columns[i].data === 'createTime') {
-                            // console.log('event = ' + JSON.stringify(event));
-                            console.log('val = ' + this.value)
-                            // pdContainer.dataTablesInput.columns[i].search.value = $.fn.dataTable.util.escapeRegex(
-                            //     $(this).val()
-                            // );
-                            // pdContainer.dataTablesInput.columns[i].search.regex = true;
-                            // pdContainer.dataTablesInput.columnsAsMap = null;
-                            // dataTableRequest(this, pdContainer);
-                        }
-                    });
-                });
-
-                appDataTable.columns().every(function (i) {
-                    $('select', this.footer()).on('change', function (event) {
+                    $('select', this.footer()).on('change', function () {
                         pdContainer.dataTablesInput.columns[i].search.value = $.fn.dataTable.util.escapeRegex(
                             $(this).val()
                         );
@@ -125,48 +111,82 @@ $(document).ready(function () {
                     });
                 });
 
-                var start = moment().subtract(29, 'days');
-                var end = moment();
-
-                $('input[name="createTime"]').daterangepicker({
-                    drops: 'up',
-                    startDate: start,
-                    endDate: end,
-                    ranges: {
-                        'Today': [moment(), moment()],
-                        'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
-                        'Last 7 Days': [moment().subtract(6, 'days'), moment()],
-                        'Last 30 Days': [moment().subtract(29, 'days'), moment()],
-                        'This Month': [moment().startOf('month'), moment().endOf('month')],
-                        'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
-                    }
-                });
-
                 appDataTable.buttons().container()
                     .appendTo('table.app-data-table_wrapper .col-sm-6:eq(0)');
 
 
-                new $.fn.dataTable.FixedHeader( appDataTable, {
+                new $.fn.dataTable.FixedHeader(appDataTable, {
                     headerOffset: 1,
                     footer: true,
                     footerOffset: 1
-                } );
+                });
 
                 $('table.app-data-table tbody').on('click', 'td.details-control', function () {
                     var tr = $(this).closest('tr');
-                    var row = appDataTable.row( tr );
+                    var row = appDataTable.row(tr);
 
-                    if ( row.child.isShown() ) {
+                    if (row.child.isShown()) {
                         // This row is already open - close it
                         row.child.hide();
                         tr.removeClass('shown');
-                    }
-                    else {
+                    } else {
                         // Open this row
-                        row.child( format(row.data()) ).show();
+                        row.child(format(row.data())).show();
                         tr.addClass('shown');
                     }
-                } );
+                });
+
+                var startPeriod;
+                var endPeriod;
+                var drops;
+                if ((displayEnd - displayStart + 1) < size) {
+                    drops = 'down';
+                } else {
+                    drops = 'up';
+                }
+
+                appDataTable.columns().every(function (i) {
+                    if (pdContainer.dataTablesInput.columns[i].data === createTime) {
+                        var date = pdContainer.dataTablesInput.columns[i].search.value;
+                        date = date.replace(/ /gi, '').split('-');
+                        var period = new Date(date[0]);
+                        startPeriod = moment(period);
+                        period = new Date(date[1]);
+                        endPeriod = moment(period);
+                    }
+                });
+
+                if (startPeriod !== undefined && endPeriod !== undefined) {
+                    var daterangepicker = $('input[name=createTime]').daterangepicker({
+                        drops: drops,
+                        startDate: startPeriod,
+                        endDate: endPeriod,
+                        alwaysShowCalendars: true,
+                        ranges: {
+                            'All':[startPeriod, moment()],
+                            'Today': [moment(), moment()],
+                            'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+                            'Last 7 Days': [moment().subtract(6, 'days'), moment()],
+                            'Last 30 Days': [moment().subtract(29, 'days'), moment()],
+                            'This Month': [moment().startOf('month'), moment().endOf('month')],
+                            'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+                        }
+                    }, function (start, end) {
+                        startPeriod = start;
+                        endPeriod = end;
+                    });
+
+                    appDataTable.columns().every(function (i) {
+                        $('input', this.footer()).on('change', function () {
+                            if (pdContainer.dataTablesInput.columns[i].data === createTime && daterangepicker !== undefined) {
+                                pdContainer.dataTablesInput.columns[i].search.value = startPeriod + ':' + endPeriod;
+                                pdContainer.dataTablesInput.columns[i].search.regex = true;
+                                pdContainer.dataTablesInput.columnsAsMap = null;
+                                dataTableRequest(this, pdContainer);
+                            }
+                        });
+                    });
+                }
 
             });
 });

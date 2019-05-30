@@ -54,11 +54,11 @@
                             <div th:case="${'createTime'}">
                                 <div class="input-group">
                                     <div class="input-group-prepend">
-                                        <span class="input-group-text" id="reportrange">
+                                        <span class="input-group-text">
                                             <i class="fa fa-calendar"></i>
                                         </span>
                                     </div>
-                                    <input type="text" name="createTime" class="form-control" th:value="${column.search.value}" th:placeholder="${column.data}" aria-describedby="reportrange">
+                                    <input type="text" name="createTime" class="form-control" th:value="${column.search.value}" th:placeholder="${column.data}">
                                 </div>
                             </div>
                             <div th:case="*">

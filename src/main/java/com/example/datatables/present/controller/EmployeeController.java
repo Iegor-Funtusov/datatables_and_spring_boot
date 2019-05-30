@@ -1,16 +1,20 @@
 package com.example.datatables.present.controller;
 
+import com.example.datatables.model.DateModel;
 import com.example.datatables.persistence.entities.Employee;
 import com.example.datatables.persistence.enums.Position;
 import com.example.datatables.present.container.ColumnDefs;
 import com.example.datatables.present.container.PageDataContainer;
 import com.example.datatables.service.impl.EmployeeDataTableService;
 import com.example.datatables.utils.DataTablesUtil;
+import com.example.datatables.utils.DateUtil;
+import com.example.datatables.utils.EntityConstUtil;
 import com.example.datatables.utils.WebRequestUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.jpa.datatables.mapping.Column;
 import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
 import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
+import org.springframework.data.jpa.datatables.mapping.Search;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -20,10 +24,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.context.request.WebRequest;
 
-import javax.persistence.criteria.Predicate;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 @Slf4j
 @Controller
@@ -75,13 +76,25 @@ public class EmployeeController {
         }
         DataTablesUtil.pageDataContainerProcess(container, dataTablesInput);
         DataTablesOutput<Employee> employees;
-        Column column = dataTablesInput.getColumn("createTime");
-        String val = column.getSearch().getValue();
-        if (val.equals("")) {
+
+        Column column = dataTablesInput.getColumn(EntityConstUtil.CREATE_TIME);
+        String datesValue = column.getSearch().getValue();
+        if (datesValue.equals("")) {
             employees = employeeDataTableService.findAll(dataTablesInput);
+            employeeDataTableService.generateStartEndTime(dataTablesInput, EntityConstUtil.CREATE_TIME);
         } else {
-            System.out.println("val = " + val);
-            employees = employeeDataTableService.findAll(dataTablesInput);
+            DateModel dateModel = DateUtil.generateDateModel(datesValue);
+            if (dateModel == null) {
+                column.setSearch(new Search("", false));
+                employees = employeeDataTableService.findAll(dataTablesInput);
+                employeeDataTableService.generateStartEndTime(dataTablesInput, EntityConstUtil.CREATE_TIME);
+            } else {
+                column.setSearch(new Search("", false));
+                employees = employeeDataTableService.findAll(dataTablesInput,
+                        (Specification<Employee>) (root, criteriaQuery, criteriaBuilder) ->
+                                criteriaBuilder.between(root.get(EntityConstUtil.CREATE_TIME), dateModel.getStartDate(), dateModel.getEndDate()));
+                column.setSearch(new Search(DateUtil.generateDateRangeModel(dateModel.getStartDate(), dateModel.getEndDate()), false));
+            }
         }
 
         DataTablesUtil.pageDataContainerProcessFinish(container, employees);
@@ -94,14 +107,6 @@ public class EmployeeController {
     }
 
     private DataTablesInput generateDataTablesInputByEmployee(PageDataContainer container) {
-        return DataTablesUtil.generateDataTablesInput(Arrays.asList("id", "createTime", "position", "firstName", "lastName", "salary", "department.id"), container);
-    }
-
-    private Specification<Employee> generateSpecification(String id) {
-        return (Specification<Employee>) (root, criteriaQuery, criteriaBuilder) -> {
-            List<Predicate> predicates = new ArrayList<>();
-            predicates.add(criteriaBuilder.equal(root.get("department").get("id"), Long.parseLong(id)));
-            return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
-        };
+        return DataTablesUtil.generateDataTablesInput(Arrays.asList(EntityConstUtil.ID, EntityConstUtil.CREATE_TIME, "position", "firstName", "lastName", "salary", "department.id"), container);
     }
 }

@@ -21,7 +21,7 @@ public class DataTablesUtil {
             Column column = new Column();
             column.setData(columnName);
             column.setName("");
-            if (columnName.equals("id")) {
+            if (columnName.equals(EntityConstUtil.ID)) {
                 column.setSearchable(false);
                 column.setOrderable(false);
             } else {
@@ -65,9 +65,15 @@ public class DataTablesUtil {
     }
 
     public void pageDataContainerProcessFinish(PageDataContainer container, DataTablesOutput output) {
-        container.setTotalElements(output.getRecordsFiltered());
-        container.setDisplayStart(generateDisplayStart(container));
-        container.setDisplayEnd(generateDisplayEnd(container));
+        if (output.getRecordsFiltered() == 0) {
+            container.setTotalElements(0);
+            container.setDisplayStart(1);
+            container.setDisplayEnd(0);
+        } else {
+            container.setTotalElements(output.getRecordsFiltered());
+            container.setDisplayStart(generateDisplayStart(container));
+            container.setDisplayEnd(generateDisplayEnd(container));
+        }
     }
 
     private long generateDisplayStart(PageDataContainer container) {
