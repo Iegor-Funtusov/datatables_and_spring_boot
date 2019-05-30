@@ -148,11 +148,13 @@ $(document).ready(function () {
                 appDataTable.columns().every(function (i) {
                     if (pdContainer.dataTablesInput.columns[i].data === createTime) {
                         var date = pdContainer.dataTablesInput.columns[i].search.value;
-                        date = date.replace(/ /gi, '').split('-');
-                        var period = new Date(date[0]);
-                        startPeriod = moment(period);
-                        period = new Date(date[1]);
-                        endPeriod = moment(period);
+                        if (date !== '') {
+                            date = date.replace(/ /gi, '').split('-');
+                            var period = new Date(date[0]);
+                            startPeriod = moment(period);
+                            period = new Date(date[1]);
+                            endPeriod = moment(period);
+                        }
                     }
                 });
 
