@@ -10,7 +10,6 @@ import com.example.datatables.utils.DataTablesUtil;
 import com.example.datatables.utils.DateUtil;
 import com.example.datatables.utils.EntityConstUtil;
 import com.example.datatables.utils.WebRequestUtil;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.jpa.datatables.mapping.Column;
 import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
 import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
@@ -26,7 +25,6 @@ import org.springframework.web.context.request.WebRequest;
 
 import java.util.Arrays;
 
-@Slf4j
 @Controller
 @RequestMapping("/employee")
 public class EmployeeController {
