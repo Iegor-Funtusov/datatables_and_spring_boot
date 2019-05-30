@@ -116,9 +116,7 @@ $(document).ready(function () {
 
 
                 new $.fn.dataTable.FixedHeader(appDataTable, {
-                    headerOffset: 1,
-                    footer: true,
-                    footerOffset: 1
+                    headerOffset: 1
                 });
 
                 $('table.app-data-table tbody').on('click', 'td.details-control', function () {
@@ -126,11 +124,9 @@ $(document).ready(function () {
                     var row = appDataTable.row(tr);
 
                     if (row.child.isShown()) {
-                        // This row is already open - close it
                         row.child.hide();
                         tr.removeClass('shown');
                     } else {
-                        // Open this row
                         row.child(format(row.data())).show();
                         tr.addClass('shown');
                     }
@@ -146,13 +142,16 @@ $(document).ready(function () {
                 }
 
                 appDataTable.columns().every(function (i) {
-                    if (pdContainer.dataTablesInput.columns[i].data === createTime) {
-                        var date = pdContainer.dataTablesInput.columns[i].search.value;
-                        date = date.replace(/ /gi, '').split('-');
-                        var period = new Date(date[0]);
-                        startPeriod = moment(period);
-                        period = new Date(date[1]);
-                        endPeriod = moment(period);
+                    var column = pdContainer.dataTablesInput.columns[i];
+                    if (column !== undefined) {
+                        if (pdContainer.dataTablesInput.columns[i].data === createTime) {
+                            var date = pdContainer.dataTablesInput.columns[i].search.value;
+                            date = date.replace(/ /gi, '').split('-');
+                            var period = new Date(date[0]);
+                            startPeriod = moment(period);
+                            period = new Date(date[1]);
+                            endPeriod = moment(period);
+                        }
                     }
                 });
 
@@ -178,15 +177,17 @@ $(document).ready(function () {
 
                     appDataTable.columns().every(function (i) {
                         $('input', this.footer()).on('change', function () {
-                            if (pdContainer.dataTablesInput.columns[i].data === createTime && daterangepicker !== undefined) {
-                                pdContainer.dataTablesInput.columns[i].search.value = startPeriod + ':' + endPeriod;
-                                pdContainer.dataTablesInput.columns[i].search.regex = true;
-                                pdContainer.dataTablesInput.columnsAsMap = null;
-                                dataTableRequest(this, pdContainer);
+                            var column = pdContainer.dataTablesInput.columns[i];
+                            if (column !== undefined) {
+                                if (pdContainer.dataTablesInput.columns[i].data === createTime && daterangepicker !== undefined) {
+                                    pdContainer.dataTablesInput.columns[i].search.value = startPeriod + ':' + endPeriod;
+                                    pdContainer.dataTablesInput.columns[i].search.regex = true;
+                                    pdContainer.dataTablesInput.columnsAsMap = null;
+                                    dataTableRequest(this, pdContainer);
+                                }
                             }
                         });
                     });
                 }
-
             });
 });

@@ -5,7 +5,6 @@ import com.example.datatables.persistence.repository.DepartmentDataTableReposito
 import com.example.datatables.persistence.repository.DepartmentRepository;
 import com.example.datatables.service.AbstractDataTableService;
 import com.example.datatables.utils.DateUtil;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.jpa.datatables.mapping.Column;
 import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
 import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
@@ -16,7 +15,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 
-@Slf4j
 @Service
 public class DepartmentDataTableService implements AbstractDataTableService<Department> {
 
@@ -37,7 +35,7 @@ public class DepartmentDataTableService implements AbstractDataTableService<Depa
     @Override
     @Transactional(readOnly = true)
     public DataTablesOutput<Department> findAll(DataTablesInput input, Specification<Department> specification) {
-        return null;
+        return departmentDataTableRepository.findAll(input, specification);
     }
 
     @Transactional(readOnly = true)
