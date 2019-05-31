@@ -106,5 +106,11 @@
 <!-- add datatables script process -->
 <script th:src="@{/js/datatables.js?v=__${'1.01'}__}"></script>
 
+<script>
+    $(document).ready(function () {
+        dataTableProcess.init();
+    });
+</script>
+
 </body>
 </html>

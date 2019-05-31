@@ -1,20 +1,17 @@
 package com.example.datatables.present.controller;
 
-import com.example.datatables.model.DateModel;
 import com.example.datatables.persistence.entities.Employee;
 import com.example.datatables.persistence.enums.Position;
 import com.example.datatables.present.container.ColumnDefs;
 import com.example.datatables.present.container.PageDataContainer;
+import com.example.datatables.service.DataTableProcessService;
 import com.example.datatables.service.impl.EmployeeDataTableService;
 import com.example.datatables.utils.DataTablesUtil;
-import com.example.datatables.utils.DateUtil;
 import com.example.datatables.utils.EntityConstUtil;
 import com.example.datatables.utils.WebRequestUtil;
 import org.springframework.data.jpa.datatables.mapping.Column;
 import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
 import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
-import org.springframework.data.jpa.datatables.mapping.Search;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -30,9 +27,11 @@ import java.util.Arrays;
 public class EmployeeController {
 
     private final EmployeeDataTableService employeeDataTableService;
+    private final DataTableProcessService<Employee> dataTableProcessService;
 
-    public EmployeeController(EmployeeDataTableService employeeDataTableService) {
+    public EmployeeController(EmployeeDataTableService employeeDataTableService, DataTableProcessService<Employee> dataTableProcessService) {
         this.employeeDataTableService = employeeDataTableService;
+        this.dataTableProcessService = dataTableProcessService;
     }
 
     @GetMapping("/list")
@@ -73,30 +72,10 @@ public class EmployeeController {
             dataTablesInput = generateDataTablesInputByEmployee(container);
         }
         DataTablesUtil.pageDataContainerProcess(container, dataTablesInput);
-        DataTablesOutput<Employee> employees;
-
-        Column column = dataTablesInput.getColumn(EntityConstUtil.CREATE_TIME);
-        String datesValue = column.getSearch().getValue();
-        if (datesValue.equals("")) {
-            employees = employeeDataTableService.findAll(dataTablesInput);
-            employeeDataTableService.generateStartEndTime(dataTablesInput, EntityConstUtil.CREATE_TIME);
-        } else {
-            DateModel dateModel = DateUtil.generateDateModel(datesValue, EntityConstUtil.CREATE_TIME);
-            if (dateModel == null) {
-                column.setSearch(new Search("", false));
-                employees = employeeDataTableService.findAll(dataTablesInput);
-                employeeDataTableService.generateStartEndTime(dataTablesInput, EntityConstUtil.CREATE_TIME);
-            } else {
-                column.setSearch(new Search("", false));
-                employees = employeeDataTableService.findAll(dataTablesInput,
-                        (Specification<Employee>) (root, criteriaQuery, criteriaBuilder) ->
-                                criteriaBuilder.between(root.get(EntityConstUtil.CREATE_TIME), dateModel.getStartDate(), dateModel.getEndDate()));
-                column.setSearch(new Search(DateUtil.generateDateRangeModel(dateModel.getStartDate(), dateModel.getEndDate()), false));
-            }
-        }
+        DataTablesOutput<Employee> employees = dataTableProcessService.generateDataTablesOutput(employeeDataTableService, dataTablesInput, Employee.class);
 
         DataTablesUtil.pageDataContainerProcessFinish(container, employees);
-        container.setColumnDefs(new ColumnDefs(new int[] { 0 }, false));
+        container.setColumnDefs(new ColumnDefs(new int[]{0}, false));
 
         model.addAttribute("pageDataContainer", container);
         model.addAttribute("employees", employees.getData());
