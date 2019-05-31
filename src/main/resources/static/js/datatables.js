@@ -33,10 +33,21 @@
                                 buttons: [
                                     'colvis',
                                     'copyHtml5',
+                                    'print',
                                     'csvHtml5',
                                     'excelHtml5',
                                     'pdfHtml5',
-                                    'print'
+                                    {
+                                        text: 'JSON',
+                                        action: function ( e, dt, button, config ) {
+                                            var data = dt.buttons.exportData();
+
+                                            $.fn.dataTable.fileSave(
+                                                new Blob( [ JSON.stringify( data ) ] ),
+                                                'export_data.json'
+                                            );
+                                        }
+                                    }
                                 ],
                                 columnDefs: [{
                                     "orderable": columnDefs.orderable,
@@ -73,6 +84,8 @@
                             dataTableRequest(this, pdContainer);
                         });
 
+                    overrideButtons();
+
                     appDataTable.columns().every(function (i) {
                         $('input', this.footer()).on('keypress', function (event) {
                             if (event.keyCode === 13) {
@@ -89,10 +102,6 @@
                             setColumnValueAndRunDataTableRequest(this, pdContainer, i, value);
                         });
                     });
-
-                    appDataTable.buttons().container()
-                        .appendTo('table.app-data-table_wrapper .col-sm-6:eq(0)');
-
 
                     new $.fn.dataTable.FixedHeader(appDataTable, {
                         headerOffset: 1
@@ -160,6 +169,15 @@
                     });
                 });
     };
+
+    function overrideButtons() {
+        var btns = document.querySelector('div.dt-buttons.btn-group');
+        var kbButtons = btns.getElementsByTagName("button");
+        for (var i = 0; i < kbButtons.length; i++) {
+            kbButtons[i].style.backgroundColor = '#f8f9fa';
+            kbButtons[i].style.color = 'black';
+        }
+    }
 
     function getAttributeByPageDataContainer(owner) {
         var pageDataJson = owner.getAttribute('page-data-container');
