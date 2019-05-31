@@ -44,6 +44,7 @@
                         <th:block th:switch="${column.data}">
                             <div th:case="${'position'}">
                                 <select class="form-control" style="min-width: 100px" >
+                                    <option th:value="${''}" th:text="${'ALL'}"></option>
                                     <option th:each="position : ${positions}"
                                             th:value="${position.name()}"
                                             th:text="${position.name()}"
@@ -52,7 +53,7 @@
                                 </select>
                             </div>
                             <div th:case="${'createTime'}">
-                                <input type="text" name="createTime" class="form-control" th:value="${column.search.value}" th:placeholder="${column.data}">
+                                <input type="text" id="createTime" class="form-control" th:value="${column.search.value}">
                             </div>
                             <div th:case="*">
                                 <input type="text" class="form-control" th:value="${column.search.value}" th:placeholder="${column.data}"/>

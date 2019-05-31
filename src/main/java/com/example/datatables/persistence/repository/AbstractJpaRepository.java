@@ -15,4 +15,10 @@ public interface AbstractJpaRepository<E extends AbstractEntity> extends JpaRepo
 
     @Query("select max (ae.createTime) from #{#entityName} ae")
     Date findMaxCreateTime();
+
+    @Query("select min (ae.updateTime) from #{#entityName} ae")
+    Date findMinUpdateTime();
+
+    @Query("select max (ae.updateTime) from #{#entityName} ae")
+    Date findMaxUpdateTime();
 }
