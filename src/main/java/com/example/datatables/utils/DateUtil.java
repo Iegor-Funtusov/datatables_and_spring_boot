@@ -17,18 +17,18 @@ public class DateUtil {
         return format.format(start) + " - " + format.format(end);
     }
 
-    public DateModel generateDateModel(String dates) {
+    public DateModel generateDateModel(String dates, String fieldName) {
         if (dateRegExPattern(dates)) {
             String[] datesArray = dates.split(":");
             Date start = new Date(Long.parseLong(datesArray[0]));
             Date end = new Date(Long.parseLong(datesArray[1]));
-            return new DateModel(start, end);
+            return new DateModel(fieldName, start, end);
         } else {
             return null;
         }
     }
 
-    private boolean dateRegExPattern(String parameter) {
+    public boolean dateRegExPattern(String parameter) {
         return parameter.matches(REGEX_CREATE_TIME_RANGE);
     }
 }

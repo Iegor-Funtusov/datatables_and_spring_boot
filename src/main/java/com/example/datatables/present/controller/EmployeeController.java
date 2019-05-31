@@ -81,7 +81,7 @@ public class EmployeeController {
             employees = employeeDataTableService.findAll(dataTablesInput);
             employeeDataTableService.generateStartEndTime(dataTablesInput, EntityConstUtil.CREATE_TIME);
         } else {
-            DateModel dateModel = DateUtil.generateDateModel(datesValue);
+            DateModel dateModel = DateUtil.generateDateModel(datesValue, EntityConstUtil.CREATE_TIME);
             if (dateModel == null) {
                 column.setSearch(new Search("", false));
                 employees = employeeDataTableService.findAll(dataTablesInput);

@@ -18,6 +18,25 @@ function dataTableRequest(owner, pdContainer) {
     jQuery(button).trigger("click");
 }
 
+function initRanges(start) {
+    return {
+        'All': [start, moment()],
+        'Today': [moment(), moment()],
+        'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+        'Last 7 Days': [moment().subtract(6, 'days'), moment()],
+        'Last 30 Days': [moment().subtract(29, 'days'), moment()],
+        'This Month': [moment().startOf('month'), moment().endOf('month')],
+        'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+    };
+}
+
+function setDaterangeColumnValue(thisVal, pdContainer, i, startPeriod, endPeriod) {
+    pdContainer.dataTablesInput.columns[i].search.value = startPeriod + ':' + endPeriod;
+    pdContainer.dataTablesInput.columns[i].search.regex = true;
+    pdContainer.dataTablesInput.columnsAsMap = null;
+    dataTableRequest(thisVal, pdContainer);
+}
+
 $(document).ready(function () {
 
     $(function () {
@@ -116,9 +135,7 @@ $(document).ready(function () {
 
 
                 new $.fn.dataTable.FixedHeader(appDataTable, {
-                    headerOffset: 1,
-                    footer: true,
-                    footerOffset: 1
+                    headerOffset: 1
                 });
 
                 $('table.app-data-table tbody').on('click', 'td.details-control', function () {
@@ -148,50 +165,40 @@ $(document).ready(function () {
                 appDataTable.columns().every(function (i) {
                     var column = pdContainer.dataTablesInput.columns[i];
                     if (column !== undefined) {
-                        if (pdContainer.dataTablesInput.columns[i].data === createTime) {
+                        var columnData = pdContainer.dataTablesInput.columns[i].data;
+                        if (columnData === createTime || columnData === updateTime) {
                             var date = pdContainer.dataTablesInput.columns[i].search.value;
-                            if (date !== '') {
-                                date = date.replace(/ /gi, '').split('-');
-                                var period = new Date(date[0]);
-                                startPeriod = moment(period);
-                                period = new Date(date[1]);
-                                endPeriod = moment(period);
+                            date = date.replace(/ /gi, '').split('-');
+                            var period = new Date(date[0]);
+                            startPeriod = moment(period);
+                            period = new Date(date[1]);
+                            endPeriod = moment(period);
+
+                            if (startPeriod !== undefined && endPeriod !== undefined) {
+
+                                var dtTime = document.getElementById(columnData);
+
+                                var daterangepicker = jQuery(dtTime).daterangepicker({
+                                    drops: drops,
+                                    startDate: startPeriod,
+                                    endDate: endPeriod,
+                                    alwaysShowCalendars: true,
+                                    ranges: initRanges(startPeriod)
+                                }, function (start, end) {
+                                    startPeriod = start;
+                                    endPeriod = end;
+                                });
+
+                                appDataTable.columns().every(function (i) {
+                                    $('input', this.footer()).on('change', function () {
+                                        if (daterangepicker !== undefined) {
+                                            setDaterangeColumnValue(this, pdContainer, i, startPeriod, endPeriod);
+                                        }
+                                    });
+                                });
                             }
                         }
                     }
                 });
-
-                if (startPeriod !== undefined && endPeriod !== undefined) {
-                    var daterangepicker = $('input[name=createTime]').daterangepicker({
-                        drops: drops,
-                        startDate: startPeriod,
-                        endDate: endPeriod,
-                        alwaysShowCalendars: true,
-                        ranges: {
-                            'All':[startPeriod, moment()],
-                            'Today': [moment(), moment()],
-                            'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
-                            'Last 7 Days': [moment().subtract(6, 'days'), moment()],
-                            'Last 30 Days': [moment().subtract(29, 'days'), moment()],
-                            'This Month': [moment().startOf('month'), moment().endOf('month')],
-                            'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
-                        }
-                    }, function (start, end) {
-                        startPeriod = start;
-                        endPeriod = end;
-                    });
-
-                    appDataTable.columns().every(function (i) {
-                        $('input', this.footer()).on('change', function () {
-                            if (pdContainer.dataTablesInput.columns[i].data === createTime && daterangepicker !== undefined) {
-                                pdContainer.dataTablesInput.columns[i].search.value = startPeriod + ':' + endPeriod;
-                                pdContainer.dataTablesInput.columns[i].search.regex = true;
-                                pdContainer.dataTablesInput.columnsAsMap = null;
-                                dataTableRequest(this, pdContainer);
-                            }
-                        });
-                    });
-                }
-
             });
 });

@@ -33,6 +33,26 @@
                     <td class="details-control"></td>
                 </tr>
                 </tbody>
+                <tfoot>
+                <tr>
+                    <th th:each="column : ${pageDataContainer.dataTablesInput.columns}">
+                        <th:block th:if="${column.searchable}">
+                            <th:block th:switch="${column.data}">
+                                <div th:case="${'createTime'}">
+                                    <input type="text" id="createTime" class="form-control" th:value="${column.search.value}">
+                                </div>
+                                <div th:case="${'updateTime'}">
+                                    <input type="text" id="updateTime" class="form-control" th:value="${column.search.value}">
+                                </div>
+                                <div th:case="*">
+                                    <input type="text" class="form-control" th:value="${column.search.value}" th:placeholder="${column.data}"/>
+                                </div>
+                            </th:block>
+                        </th:block>
+                    </th>
+                    <th></th>
+                </tr>
+                </tfoot>
             </table>
         </form>
     </div>
