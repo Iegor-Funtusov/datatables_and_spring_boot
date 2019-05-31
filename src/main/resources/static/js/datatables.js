@@ -30,32 +30,37 @@
                                 pageLength: size,
                                 pagingType: "full",
                                 order: [orderCol, orderDir],
-                                buttons: [
-                                    'colvis',
-                                    'copyHtml5',
-                                    'print',
-                                    'csvHtml5',
-                                    'excelHtml5',
-                                    'pdfHtml5',
-                                    {
-                                        text: 'JSON',
-                                        action: function ( e, dt, button, config ) {
-                                            var data = dt.buttons.exportData();
-
-                                            $.fn.dataTable.fileSave(
-                                                new Blob( [ JSON.stringify( data ) ] ),
-                                                'export_data.json'
-                                            );
-                                        }
-                                    }
-                                ],
                                 columnDefs: [{
                                     "orderable": columnDefs.orderable,
                                     "searchable": columnDefs.orderable,
                                     "targets": columnDefs.targets
                                 }],
+                                buttons: [
+                                    'colvis',
+                                    'print',
+                                    'copyHtml5',
+                                    'csvHtml5',
+                                    'excelHtml5',
+                                    'pdfHtml5',
+                                    {
+                                        text: 'JSON',
+                                        action: function ( e, dt ) {
+                                            var data = dt.buttons.exportData();
+                                            $.fn.dataTable.fileSave(
+                                                new Blob( [ JSON.stringify( data ) ] ),
+                                                'export_data.json'
+                                            );
+                                        }
+                                    },
+                                    {
+                                        text: 'Clear',
+                                        action: function () {
+                                            window.location.replace(window.location.href);
+                                        }
+                                    }
+                                ],
                                 displayStart: displayStart - 1,
-                                dom: '<"dom_wrapper fh-fixedHeader"<"d-flex justify-content-between"Bl>>t<"d-flex justify-content-between"ip><"clear">',
+                                dom: '<"d-flex justify-content-between"Bl>t<"d-flex justify-content-between"ip><"clear">',
                                 preDrawCallback: function (settings) {
                                     settings.oFeatures.bServerSide = "ssp";
                                     settings.bDestroying = true;
@@ -179,6 +184,10 @@
         }
     }
 
+    function clearrAll(pdContainer) {
+        console.log('clear')
+    }
+
     function getAttributeByPageDataContainer(owner) {
         var pageDataJson = owner.getAttribute('page-data-container');
         return eval('(' + pageDataJson + ')');
@@ -211,10 +220,14 @@
         };
     }
 
-    function setColumnValueAndRunDataTableRequest(thisVal, pdContainer, i, value) {
+    function setColumnValue(pdContainer, i, value) {
         pdContainer.dataTablesInput.columns[i].search.value = value;
         pdContainer.dataTablesInput.columns[i].search.regex = true;
         pdContainer.dataTablesInput.columnsAsMap = null;
+    }
+
+    function setColumnValueAndRunDataTableRequest(thisVal, pdContainer, i, value) {
+        setColumnValue(pdContainer, i, value);
         dataTableRequest(thisVal, pdContainer);
     }
 
