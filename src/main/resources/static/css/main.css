@@ -1,3 +1,8 @@
+:root {
+    /* Bootstrap primary color */
+    --daterangepicker-active-bg-color: #007bff;
+}
+
 div.dom_wrapper {
     position: sticky !important;
     top: 0;
@@ -25,9 +30,17 @@ tfoot {
 }
 
 td.details-control {
-    background: url('../img/details_open.png') no-repeat center center;
+    background: url('https://img.icons8.com/color/20/000000/plus.png') no-repeat center center;
     cursor: pointer;
 }
 tr.shown td.details-control {
-    background: url('../img/details_close.png') no-repeat center center;
+    background: url('https://img.icons8.com/color/20/000000/cancel.png') no-repeat center center;
+}
+
+.daterangepicker .ranges li.active {
+    background-color: var(--daterangepicker-active-bg-color) !important;
+}
+
+.daterangepicker td.active, .daterangepicker td.active:hover {
+    background-color: var(--daterangepicker-active-bg-color) !important;
 }

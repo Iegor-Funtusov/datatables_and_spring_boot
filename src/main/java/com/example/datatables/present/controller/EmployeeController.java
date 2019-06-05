@@ -74,7 +74,7 @@ public class EmployeeController {
         DataTablesUtil.pageDataContainerProcess(container, dataTablesInput);
         DataTablesOutput<Employee> employees = dataTableProcessService.generateDataTablesOutput(employeeDataTableService, dataTablesInput, Employee.class);
 
-        DataTablesUtil.pageDataContainerProcessFinish(container, employees);
+        DataTablesUtil.pageDataContainerProcessFinish(container, employees.getRecordsFiltered());
         container.setColumnDefs(new ColumnDefs(new int[]{0}, false));
 
         model.addAttribute("pageDataContainer", container);

@@ -54,7 +54,7 @@ public class DepartmentController {
         DataTablesUtil.pageDataContainerProcess(container, dataTablesInput);
         DataTablesOutput<Department> departments = dataTableProcessService.generateDataTablesOutput(departmentDataTableService, dataTablesInput, Department.class);
 
-        DataTablesUtil.pageDataContainerProcessFinish(container, departments);
+        DataTablesUtil.pageDataContainerProcessFinish(container, departments.getRecordsFiltered());
         container.setColumnDefs(new ColumnDefs(new int[]{0, 4}, false));
 
         model.addAttribute("pageDataContainer", container);

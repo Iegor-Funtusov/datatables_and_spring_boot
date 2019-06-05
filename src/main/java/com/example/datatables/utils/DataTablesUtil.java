@@ -1,6 +1,5 @@
 package com.example.datatables.utils;
 
-import com.example.datatables.persistence.entities.AbstractEntity;
 import com.example.datatables.present.container.PageDataContainer;
 import lombok.experimental.UtilityClass;
 import org.apache.commons.lang3.ObjectUtils;
@@ -12,9 +11,13 @@ import java.util.List;
 @UtilityClass
 public class DataTablesUtil {
 
+    private final String ORDER_DESC = "desc";
+    private final int ZERO_VALUE = 0;
+    private final int ONE_VALUE = 1;
+
     public DataTablesInput generateDataTablesInput(List<String> columnsName, PageDataContainer container) {
         List<Order> orders = new ArrayList<>();
-        Order order = new Order(1, "desc");
+        Order order = new Order(1, ORDER_DESC);
         orders.add(order);
         List<Column> columns = new ArrayList<>();
 
@@ -38,23 +41,24 @@ public class DataTablesUtil {
         dataTablesInput.setColumns(columns);
         dataTablesInput.setOrder(orders);
         dataTablesInput.setLength(container.getSize());
-        dataTablesInput.setStart(container.getPage() - 1);
+        dataTablesInput.setStart(container.getPage() - ONE_VALUE);
+
         return dataTablesInput;
     }
 
     public void pageDataContainerProcess(PageDataContainer container, DataTablesInput dataTablesInput) {
-        if (dataTablesInput.getOrder().get(0).getColumn() != container.getOrderCol() ||
-                ObjectUtils.notEqual(dataTablesInput.getOrder().get(0).getDir(), container.getOrderDir())) {
-            container.setPage(1);
-            dataTablesInput.setStart(container.getPage() - 1);
+        if (dataTablesInput.getOrder().get(ZERO_VALUE).getColumn() != container.getOrderCol() ||
+                ObjectUtils.notEqual(dataTablesInput.getOrder().get(ZERO_VALUE).getDir(), container.getOrderDir())) {
+            container.setPage(ONE_VALUE);
+            dataTablesInput.setStart(container.getPage() - ONE_VALUE);
         } else {
-            dataTablesInput.setStart((container.getPage() - 1) * container.getSize());
+            dataTablesInput.setStart((container.getPage() - ONE_VALUE) * container.getSize());
         }
 
         if (dataTablesInput.getLength() != container.getSize()) {
-            container.setPage(1);
+            container.setPage(ONE_VALUE);
             dataTablesInput.setLength(container.getSize());
-            dataTablesInput.setStart(container.getPage() - 1);
+            dataTablesInput.setStart(container.getPage() - ONE_VALUE);
         }
 
         List<Order> orders = new ArrayList<>();
@@ -65,30 +69,30 @@ public class DataTablesUtil {
         container.setDataTablesInput(dataTablesInput);
     }
 
-    public void pageDataContainerProcessFinish(PageDataContainer container, DataTablesOutput<? extends AbstractEntity> output) {
-        if (output.getRecordsFiltered() == 0) {
-            container.setTotalElements(0);
-            container.setDisplayStart(1);
-            container.setDisplayEnd(0);
+    public void pageDataContainerProcessFinish(PageDataContainer container, long recordsFiltered) {
+        if (recordsFiltered == ZERO_VALUE) {
+            container.setTotalElements(ZERO_VALUE);
+            container.setDisplayStart(ONE_VALUE);
+            container.setDisplayEnd(ZERO_VALUE);
         } else {
-            container.setTotalElements(output.getRecordsFiltered());
+            container.setTotalElements(recordsFiltered);
             container.setDisplayStart(generateDisplayStart(container));
             container.setDisplayEnd(generateDisplayEnd(container));
         }
     }
 
     private long generateDisplayStart(PageDataContainer container) {
-        if (container.getTotalElements() == 0) {
-            return 0;
+        if (container.getTotalElements() == ZERO_VALUE) {
+            return ZERO_VALUE;
         } else if (container.getSize() > container.getTotalElements()) {
-            return 1;
+            return ONE_VALUE;
         } else {
-            return container.getSize() * (container.getPage() - 1) + 1;
+            return container.getSize() * (container.getPage() - ONE_VALUE) + ONE_VALUE;
         }
     }
 
     private long generateDisplayEnd(PageDataContainer container) {
-        int lastSize = container.getSize() * (container.getPage() - 1) + container.getSize();
+        int lastSize = container.getSize() * (container.getPage() - ONE_VALUE) + container.getSize();
         if (lastSize <= container.getTotalElements()) {
             return lastSize;
         } else {

@@ -60,7 +60,7 @@
                                     }
                                 ],
                                 displayStart: displayStart - 1,
-                                dom: '<"d-flex justify-content-between"Bl>t<"d-flex justify-content-between"ip><"clear">',
+                                dom: '<"d-flex justify-content-between"B>t<"row"><"d-flex justify-content-between"<"mt-2"l>ip><"clear">',
                                 preDrawCallback: function (settings) {
                                     settings.oFeatures.bServerSide = "ssp";
                                     settings.bDestroying = true;
@@ -152,10 +152,14 @@
 
                                     var daterangepicker = jQuery(dtTime).daterangepicker({
                                         drops: drops,
-                                        startDate: startPeriod,
-                                        endDate: endPeriod,
                                         alwaysShowCalendars: true,
-                                        ranges: initRanges(startPeriod)
+                                        ranges: initRanges(startPeriod, endPeriod),
+                                        buttonClasses: 'btn btn-primary',
+                                        cancelButtonClasses: 'btn btn-primary',
+                                        applyButtonClasses: 'btn btn-success',
+                                        locale: {
+                                            firstDay: 1
+                                        }
                                     }, function (start, end) {
                                         startPeriod = start;
                                         endPeriod = end;
@@ -182,10 +186,6 @@
             kbButtons[i].style.backgroundColor = '#f8f9fa';
             kbButtons[i].style.color = 'black';
         }
-    }
-
-    function clearrAll(pdContainer) {
-        console.log('clear')
     }
 
     function getAttributeByPageDataContainer(owner) {
