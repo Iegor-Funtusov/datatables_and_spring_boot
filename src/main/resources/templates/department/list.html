@@ -18,9 +18,9 @@
                 <thead>
                 <tr>
                     <th>id</th>
-                    <th>Create Time</th>
+                    <th th:attr="dt-feature=${'{orderable : true, searchable : false}'}, dt-name=${'createTime'}">Create Time</th>
                     <th>Update Time</th>
-                    <th data-class-name="priority">Name</th>
+                    <th data-class-name="priority" th:attr="dt-feature=${'{orderable : true, searchable : false}'}, dt-name=${'name'}">Name</th>
                     <th>emp</th>
                 </tr>
                 </thead>
