@@ -36,9 +36,9 @@ public class SpecificationUtil {
         return predicates;
     }
 
-    private List<Field> getAllFieldsByEntity(Class entityClass) {
+    private List<Field> getAllFieldsByEntity(Class<?> entityClass) {
         List<Field> fields = new ArrayList<>();
-        Class nextClass = entityClass;
+        Class<?> nextClass = entityClass;
         do {
             Field[] innerFields = nextClass.getDeclaredFields();
             fields.addAll(Arrays.asList(innerFields));
