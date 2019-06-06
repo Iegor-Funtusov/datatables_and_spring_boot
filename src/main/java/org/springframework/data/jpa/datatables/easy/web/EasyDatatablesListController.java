@@ -27,6 +27,7 @@ public abstract class EasyDatatablesListController<T> {
     protected SessionData sessionData;
 
     protected abstract String getListCode();
+    protected abstract Map<String, List<Enum<?>>> getListEnumsField();
     protected abstract DataTablesRepository<T, Long> getDataTableRepository();
 
     protected String list(Model model, WebRequest webRequest) {
@@ -35,7 +36,9 @@ public abstract class EasyDatatablesListController<T> {
         DataTablesUtil.updatePageData(pageData, dto.getRecordsFiltered());
         model.addAttribute(getListCode() + "List", dto.getData());
         model.addAttribute(getListCode() + "Page", pageData);
-
+        if (!getListEnumsField().isEmpty()) {
+            model.addAttribute("enums", getListEnumsField());
+        }
         return "/" + getListCode() + "/list";
     }
 
@@ -73,7 +76,7 @@ public abstract class EasyDatatablesListController<T> {
         DataTablesInput i = new DataTablesInput();
 
         i.setLength(pd.getSize());
-        i.setStart((DataTablesUtil.generateDisplayStart(pd)) - 1);
+        i.setStart(((pd.getPage() - 1) * pd.getSize()));
 
         if (StringUtils.isNotBlank(pd.getOrder())) {
             String[] orderSplit = pd.getOrder().split("_");

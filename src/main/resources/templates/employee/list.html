@@ -17,13 +17,13 @@
                th:attr="dt-page=${T(org.springframework.data.jpa.datatables.easy.util.JsonUtil).json(employeePage)}">
             <thead>
             <tr>
-                <th dt-field="id">id</th>
-                <th dt-field="createTime">Create Time</th>
-                <th dt-field="position">Position</th>
-                <th dt-field="firstName">First Name</th>
-                <th dt-field="lastName">Last Name</th>
-                <th dt-field="salary">Salary</th>
-                <th dt-field="department">Department</th>
+                <th dt-field="id" dt-type="number">id</th>
+                <th dt-field="createTime" dt-type="date">Create Time</th>
+                <th dt-field="position" dt-type="enum">Position</th>
+                <th dt-field="firstName" dt-type="string">First Name</th>
+                <th dt-field="lastName" dt-type="string">Last Name</th>
+                <th dt-field="salary" dt-type="number">Salary</th>
+                <th dt-field="department.id" dt-searchable="false" dt-type="object">Department</th>
             </tr>
             </thead>
             <tbody>
@@ -41,5 +41,12 @@
         </form>
     </div>
 </div>
+
+<script th:inline="javascript">
+    function getAllEnums() {
+        return [[${enums}]];
+    }
+</script>
+
 </body>
 </html>
