@@ -19,7 +19,7 @@ public class DataTablesUtil {
         }
     }
 
-    public static int generateDisplayStart(PageData pageData) {
+    private static int generateDisplayStart(PageData pageData) {
         if (pageData.getTotalElements() == ZERO_VALUE) {
             return ZERO_VALUE;
         } else if (pageData.getSize() > pageData.getTotalElements()) {
