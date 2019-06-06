@@ -103,11 +103,12 @@
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
 
 <!-- add datatables script process -->
-<script th:src="@{/js/datatables.js?v=__${'1.02'}__}"></script>
+<!--<script th:src="@{/js/datatables.js?v=__${'1.02'}__}"></script>-->
+<script th:src="@{/js/datatables-easy.js?v=__${'1.01'}__}"></script>
 
-<script>
+<script type="text/javascript" th:inline="javascript">
     $(document).ready(function () {
-        dataTableProcess.init();
+        dataTablesEasy.init();
     });
 </script>
 

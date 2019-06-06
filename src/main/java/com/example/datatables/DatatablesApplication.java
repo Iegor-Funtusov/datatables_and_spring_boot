@@ -5,8 +5,10 @@ import com.example.datatables.persistence.entities.Employee;
 import com.example.datatables.persistence.enums.Position;
 import com.example.datatables.persistence.repository.DepartmentRepository;
 import com.example.datatables.persistence.repository.EmployeeRepository;
+
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.data.jpa.datatables.repository.DataTablesRepositoryFactoryBean;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
@@ -16,15 +18,12 @@ import java.util.List;
 import java.util.Random;
 
 @SpringBootApplication
+@ComponentScan(value = { "com.example.datatables", "org.springframework.data.jpa.datatables.easy" })
 @EnableJpaRepositories(repositoryFactoryBeanClass = DataTablesRepositoryFactoryBean.class, basePackages = "com.example.datatables.persistence.repository")
 public class DatatablesApplication {
 
 	private final DepartmentRepository departmentRepository;
 	private final EmployeeRepository employeeRepository;
-
-	private int leftLimit = 97;
-	private int rightLimit = 122;
-	private int targetStringLength = 10;
 
 	public DatatablesApplication(DepartmentRepository departmentRepository, EmployeeRepository employeeRepository) {
 		this.departmentRepository = departmentRepository;
@@ -73,8 +72,11 @@ public class DatatablesApplication {
 
 	private String rand() {
 		Random random = new Random();
+		int targetStringLength = 10;
 		StringBuilder buffer = new StringBuilder(targetStringLength);
 		for (int i = 0; i < targetStringLength; i++) {
+			int leftLimit = 97;
+			int rightLimit = 122;
 			int randomLimitedInt = leftLimit + (int)
 					(random.nextFloat() * (rightLimit - leftLimit + 1));
 			buffer.append((char) randomLimitedInt);

@@ -1,17 +1,10 @@
 package com.example.datatables.present.controller;
 
 import com.example.datatables.persistence.entities.Employee;
-import com.example.datatables.persistence.enums.Position;
-import com.example.datatables.present.container.ColumnDefs;
-import com.example.datatables.present.container.PageDataContainer;
-import com.example.datatables.service.DataTableProcessService;
-import com.example.datatables.service.impl.EmployeeDataTableService;
-import com.example.datatables.utils.DataTablesUtil;
-import com.example.datatables.utils.EntityConstUtil;
-import com.example.datatables.utils.WebRequestUtil;
-import org.springframework.data.jpa.datatables.mapping.Column;
-import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
-import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
+import com.example.datatables.persistence.repository.EmployeeDataTableRepository;
+
+import org.springframework.data.jpa.datatables.easy.web.EasyDatatablesListController;
+import org.springframework.data.jpa.datatables.repository.DataTablesRepository;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,70 +13,33 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.context.request.WebRequest;
 
-import java.util.Arrays;
-
 @Controller
 @RequestMapping("/employee")
-public class EmployeeController {
+public class EmployeeController extends EasyDatatablesListController<Employee> {
 
-    private final EmployeeDataTableService employeeDataTableService;
-    private final DataTableProcessService<Employee> dataTableProcessService;
+    private final EmployeeDataTableRepository employeeDataTableRepository;
 
-    public EmployeeController(EmployeeDataTableService employeeDataTableService, DataTableProcessService<Employee> dataTableProcessService) {
-        this.employeeDataTableService = employeeDataTableService;
-        this.dataTableProcessService = dataTableProcessService;
+    public EmployeeController(EmployeeDataTableRepository employeeDataTableRepository) {
+        this.employeeDataTableRepository = employeeDataTableRepository;
     }
 
     @GetMapping("/list")
-    public String list(Model model) {
-        return getPage(model, new PageDataContainer());
+    public String list(Model model, WebRequest webRequest) {
+        return super.list(model, webRequest);
     }
 
     @PostMapping("/list")
     public String listData(Model model, WebRequest webRequest) {
-        PageDataContainer container = WebRequestUtil.getPageDataContainerByWebRequest(webRequest);
-        if (container != null) {
-            return getPage(model, container);
-        } else {
-            return getPage(model, new PageDataContainer());
-        }
+        return super.list(model, webRequest);
     }
 
-    @GetMapping("/list/{id}")
-    public String list(Model model, @PathVariable long id, WebRequest webRequest) {
-        PageDataContainer container = WebRequestUtil.getPageDataContainerByWebRequest(webRequest);
-        if (container != null) {
-            Column column = container.getDataTablesInput().getColumn("department.id");
-            column.setSearchValue(String.valueOf(id));
-            return getPage(model, container);
-        } else {
-            container = new PageDataContainer();
-            DataTablesInput dataTablesInput = generateDataTablesInputByEmployee(container);
-            Column column = dataTablesInput.getColumn("department.id");
-            column.setSearchValue(String.valueOf(id));
-            container.setDataTablesInput(dataTablesInput);
-            return getPage(model, container);
-        }
+    @Override
+    protected String getListCode() {
+        return "employee";
     }
 
-    private String getPage(Model model, PageDataContainer container) {
-        DataTablesInput dataTablesInput = container.getDataTablesInput();
-        if (dataTablesInput == null) {
-            dataTablesInput = generateDataTablesInputByEmployee(container);
-        }
-        DataTablesUtil.pageDataContainerProcess(container, dataTablesInput);
-        DataTablesOutput<Employee> employees = dataTableProcessService.generateDataTablesOutput(employeeDataTableService, dataTablesInput, Employee.class);
-
-        DataTablesUtil.pageDataContainerProcessFinish(container, employees.getRecordsFiltered());
-        container.setColumnDefs(new ColumnDefs(new int[]{0}, false));
-
-        model.addAttribute("pageDataContainer", container);
-        model.addAttribute("employees", employees.getData());
-        model.addAttribute("positions", Position.values());
-        return "employee/list";
-    }
-
-    private DataTablesInput generateDataTablesInputByEmployee(PageDataContainer container) {
-        return DataTablesUtil.generateDataTablesInput(Arrays.asList(EntityConstUtil.ID, EntityConstUtil.CREATE_TIME, "position", "firstName", "lastName", "salary", "department.id"), container);
+    @Override
+    protected DataTablesRepository<Employee, Long> getDataTableRepository() {
+        return this.employeeDataTableRepository;
     }
 }

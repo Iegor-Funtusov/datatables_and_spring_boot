@@ -13,8 +13,8 @@
     </div>
     <div class="card-body table-responsive">
         <form action="#" th:action="@{/employee/list}" method="post">
-        <table class="table table-striped table-bordered table-sm app-data-table order-column"
-               data-th-attr="page-data-container=${T(com.example.datatables.utils.JsonGenerator).generateJson(pageDataContainer)}">
+        <table class="table table-striped table-bordered table-sm datatables-easy"
+               th:attr="dt-page=${T(org.springframework.data.jpa.datatables.easy.util.JsonUtil).json(employeePage)}">
             <thead>
             <tr>
                 <th>id</th>
@@ -27,7 +27,7 @@
             </tr>
             </thead>
             <tbody>
-            <tr th:each="employee,iter : ${employees}">
+            <tr th:each="employee,iter : ${employeeList}">
                 <td th:text="${employee.getId()}">id</td>
                 <td th:text="${#dates.format(employee.getCreateTime(), 'yyyy-MM-dd HH:mm:ss')}">Create Time</td>
                 <td th:text="${employee.getPosition()}">Position</td>
@@ -37,32 +37,6 @@
                 <td th:text="${employee.getDepartment().getId()} + ' : ' + ${employee.getDepartment().getName()}">Name</td>
             </tr>
             </tbody>
-            <tfoot>
-            <tr>
-                <th th:each="column : ${pageDataContainer.dataTablesInput.columns}">
-                    <th:block th:if="${column.searchable}">
-                        <th:block th:switch="${column.data}">
-                            <div th:case="${'position'}">
-                                <select class="form-control" style="min-width: 100px" >
-                                    <option th:value="${''}" th:text="${'ALL'}"></option>
-                                    <option th:each="position : ${positions}"
-                                            th:value="${position.name()}"
-                                            th:text="${position.name()}"
-                                            th:selected="${column.search.value == position.name()}">
-                                    </option>
-                                </select>
-                            </div>
-                            <div th:case="${'createTime'}">
-                                <input type="text" id="createTime" class="form-control" th:value="${column.search.value}">
-                            </div>
-                            <div th:case="*">
-                                <input type="text" class="form-control" th:value="${column.search.value}" th:placeholder="${column.data}"/>
-                            </div>
-                        </th:block>
-                    </th:block>
-                </th>
-            </tr>
-            </tfoot>
         </table>
         </form>
     </div>
