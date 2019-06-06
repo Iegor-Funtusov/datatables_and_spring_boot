@@ -18,8 +18,8 @@
         	return false;
         }
         console.log(pdContainer);
-        var dtInfoList = initColumnProperties(table);
-        var orderInfo = initOrders(dtInfoList, pdContainer);
+        var columnDefs = buildColumnDefs(t);
+        var orderInfo = initOrders(columnDefs, pdContainer);
 
         var totalElements = pdContainer.totalElements;
         var size = pdContainer.size;
@@ -49,17 +49,17 @@
                 }
             };
         
-        var columnDefs = buildColumnDefs(t);
+
        	dataTablesSettings['columnDefs'] = columnDefs;
 
-       	renderFitlers(t, columnDefs, dtInfoList, pdContainer);
+       	renderFitlers(t, columnDefs, pdContainer);
 
         //configButtons(dataTablesSettings);
         
         var appDataTable = t
             .DataTable(dataTablesSettings)
             .on('order.dt', function (e, settings, order) {
-                pdContainer.order = dtInfoList[order[0].col].field + '_' + order[0].dir;
+                pdContainer.order = columnDefs[order[0].col].field + '_' + order[0].dir;
                 dataTableRequest(this, pdContainer);
             })
             .on('length.dt', function (e, settings, len) {
@@ -82,7 +82,7 @@
                     } else {
                         filterMap.dict = pdContainer.filterMap;
                     }
-                    filterMap.put(dtInfoList[i].field, this.value);
+                    filterMap.put(columnDefs[i].field, this.value);
                     pdContainer.filterMap = filterMap.dict;
                     dataTableRequest(this, pdContainer);
                 }
@@ -180,32 +180,14 @@
     	// }
     }
 
-    function initColumnProperties(table) {
-        var dtInfoList = [];
-
-        var td = table.querySelectorAll("thead th");
-
-        for (var i = 0; i < td.length; i++) {
-            var dtInfo = {};
-            var tdField = td[i].getAttribute('dt-field');
-            if (tdField !== null) {
-                dtInfo.field = tdField;
-                dtInfo.col = i;
-            }
-            dtInfoList.push(dtInfo);
-        }
-
-        return dtInfoList;
-    }
-
-    function initOrders(dtInfoList, pdContainer) {
+    function initOrders(columnDefs, pdContainer) {
         var orderColDir = pdContainer.order;
         var order = {};
         if (orderColDir !== null) {
             var sort = orderColDir.split('_');
-            for (var index in dtInfoList) {
-                var dtInfo = dtInfoList[index].field;
-                var col = dtInfoList[index].col;
+            for (var index in columnDefs) {
+                var dtInfo = columnDefs[index].field;
+                var col = columnDefs[index].targets[0];
                 if (dtInfo === sort[0]) {
                     order.col = col;
                     order.dir = sort[1];
@@ -218,7 +200,7 @@
         return order;
     }
     
-    function renderFitlers(t, columnDefs, dtInfoList, pdContainer) {
+    function renderFitlers(t, columnDefs, pdContainer) {
     	var thead = t.find('thead');
     	var tfoot = t.find('tfoot');
     	if (tfoot.length === 0) {
@@ -230,7 +212,7 @@
             var title = $(this).text();
 
             if (pdContainer.filterMap !== null) {
-                var field = dtInfoList[i].field;
+                var field = columnDefs[i].field;
                 var filterMap = new Map();
                 filterMap.dict = pdContainer.filterMap;
                 var searchField = filterMap.get(field);
