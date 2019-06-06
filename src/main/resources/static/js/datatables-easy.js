@@ -9,7 +9,7 @@
     dataTablesEasy.init = function () {
         $('table.'+dataTablesEasy.config.tableClass).each(function(){return configureDataTable(this)});
     };
-    
+
     function configureDataTable(table) {
     	var t = $(table);
         var pdContainer = getAttributeByPageDataContainer(t);
@@ -17,21 +17,20 @@
         	console.log('Attribute with page data is not found on table '+table);
         	return false;
         }
+        var dtInfoList = initColumnProperties(table);
+        var orderInfo = initOrders(dtInfoList, pdContainer);
+
         var totalElements = pdContainer.totalElements;
         var size = pdContainer.size;
         var displayStart = pdContainer.displayStart;
         var displayEnd = pdContainer.displayEnd;
-        var orderCol = pdContainer.orderCol;
-        var orderDir = pdContainer.orderDir;
-        var createTime = "createTime";
-        var updateTime = "updateTime";
-        
+
         var dataTablesSettings = {
                 colReorder: true,
                 responsive: true,
                 pageLength: size,
                 pagingType: "full",
-                //order: [orderCol, orderDir],
+                order: [orderInfo.col, orderInfo.dir],
                 displayStart: displayStart - 1,
                 dom: '<"d-flex justify-content-between"Bl>t<"d-flex justify-content-between"ip><"clear">',
                 preDrawCallback: function (settings) {
@@ -59,8 +58,7 @@
         var appDataTable = t
             .DataTable(dataTablesSettings)
             .on('order.dt', function (e, settings, order) {
-                pdContainer.orderCol = order[0].col;
-                pdContainer.orderDir = order[0].dir;
+                pdContainer.order = dtInfoList[order[0].col].field + '_' + order[0].dir;
                 dataTableRequest(this, pdContainer);
             })
             .on('length.dt', function (e, settings, len) {
@@ -121,6 +119,8 @@
 	        appDataTable.columns().every(function (i) {
 	            var column = pdContainer.dataTablesInput.columns[i];
 	            if (column !== undefined) {
+                    var createTime = "createTime";
+                    var updateTime = "updateTime";
 	                var columnData = pdContainer.dataTablesInput.columns[i].data;
 	                if (columnData === createTime || columnData === updateTime) {
 	                    var date = pdContainer.dataTablesInput.columns[i].search.value;
@@ -171,6 +171,44 @@
     	        class: 'internal-submit' 
     	    }).appendTo(tableForm);
     	}        
+    }
+
+    function initColumnProperties(table) {
+        var dtInfoList = [];
+
+        var td = table.querySelectorAll("thead th");
+
+        for (var i = 0; i < td.length; i++) {
+            var dtInfo = {};
+            var tdField = td[i].getAttribute('dt-field');
+            if (tdField !== null) {
+                dtInfo.field = tdField;
+                dtInfo.col = i;
+            }
+            dtInfoList.push(dtInfo);
+        }
+
+        return dtInfoList;
+    }
+
+    function initOrders(dtInfoList, pdContainer) {
+        var orderColDir = pdContainer.order;
+        var order = {};
+        if (orderColDir !== null) {
+            var sort = orderColDir.split('_');
+            for (var index in dtInfoList) {
+                var dtInfo = dtInfoList[index].field;
+                var col = dtInfoList[index].col;
+                if (dtInfo === sort[0]) {
+                    order.col = col;
+                    order.dir = sort[1];
+                }
+            }
+        } else {
+            order.col = 0;
+            order.dir = "asc";
+        }
+        return order;
     }
     
     function renderFitlers(t, columnDefs) {

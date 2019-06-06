@@ -17,11 +17,11 @@
                    th:attr="dt-page=${T(org.springframework.data.jpa.datatables.easy.util.JsonUtil).json(departmentPage)}">
                 <thead>
                 <tr>
-                    <th>id</th>
-                    <th>Create Time</th>
-                    <th>Update Time</th>
-                    <th>Name</th>
-                    <th>emp</th>
+                    <th dt-field="id">id</th>
+                    <th dt-field="createTime">Create Time</th>
+                    <th dt-field="updateTime">Update Time</th>
+                    <th dt-field="name">Name</th>
+                    <th dt-orderable="false">emp</th>
                 </tr>
                 </thead>
                 <tbody>

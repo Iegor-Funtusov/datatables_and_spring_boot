@@ -24,10 +24,6 @@ public class SessionData implements Serializable {
             pageData.setSize(defaultPageSize);
             pageStateByControllerClass.put(controllerClass, pageData);
         }
-
-        System.out.println("SessionData.getOrCreatePageData");
-        System.out.println("pageData = " + pageData.toString());
-
         return pageData;
     }
 }

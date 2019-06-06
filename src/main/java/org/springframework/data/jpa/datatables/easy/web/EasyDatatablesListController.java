@@ -7,16 +7,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.datatables.easy.data.PageData;
 import org.springframework.data.jpa.datatables.easy.data.SessionData;
 import org.springframework.data.jpa.datatables.easy.util.DataTablesUtil;
-import org.springframework.data.jpa.datatables.mapping.Column;
-import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
-import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
-import org.springframework.data.jpa.datatables.mapping.Order;
+import org.springframework.data.jpa.datatables.mapping.*;
 import org.springframework.data.jpa.datatables.repository.DataTablesRepository;
 import org.springframework.ui.Model;
 import org.springframework.web.context.request.WebRequest;
 
 import java.io.IOException;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 @Slf4j
@@ -81,11 +78,14 @@ public abstract class EasyDatatablesListController<T> {
             if (orderSplit.length == 2 && "asc,desc".contains(orderSplit[1])) {
                 String fieldName = orderSplit[0];
                 String ascDesc = orderSplit[1];
-                List<Order> orders = Arrays.asList(new Order[] { new Order(0, ascDesc) });
-                Column sortColumn = new Column();
-                sortColumn.setData(fieldName);
-                sortColumn.setOrderable(true);
-                List<Column> columns = Arrays.asList(new Column[] { sortColumn });
+                List<Order> orders = Collections.singletonList(new Order(0, ascDesc));
+                Column column = new Column();
+                column.setSearchable(true);
+                column.setOrderable(true);
+                column.setData(fieldName);
+                column.setName("");
+                column.setSearch(new Search("", false));
+                List<Column> columns = Collections.singletonList(column);
 
                 i.setOrder(orders);
                 i.setColumns(columns);
