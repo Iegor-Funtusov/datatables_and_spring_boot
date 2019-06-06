@@ -5,7 +5,7 @@ import lombok.Setter;
 import lombok.ToString;
 
 import java.io.Serializable;
-//import java.util.Map;
+import java.util.Map;
 
 @Getter
 @Setter
@@ -29,7 +29,7 @@ public class PageData implements Serializable {
     /*
      * "title" -> "My name", "createDate" -> "20.02.2019 - 30.05.2019"
      */
-//    private Map<String, String> filterMap;
+    private Map<String, String> filterMap;
 
     public static PageData getDefault() {
         return DEFAULT;

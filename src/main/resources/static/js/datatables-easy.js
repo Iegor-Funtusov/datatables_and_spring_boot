@@ -17,6 +17,7 @@
         	console.log('Attribute with page data is not found on table '+table);
         	return false;
         }
+        console.log(pdContainer);
         var dtInfoList = initColumnProperties(table);
         var orderInfo = initOrders(dtInfoList, pdContainer);
 
@@ -51,7 +52,7 @@
         var columnDefs = buildColumnDefs(t);
        	dataTablesSettings['columnDefs'] = columnDefs;
 
-       	renderFitlers(t, columnDefs);
+       	renderFitlers(t, columnDefs, dtInfoList, pdContainer);
 
         //configButtons(dataTablesSettings);
         
@@ -75,7 +76,15 @@
         appDataTable.columns().every(function (i) {
             $('input', this.footer()).on('keypress', function (event) {
                 if (event.keyCode === 13) {
-                    setColumnValueAndRunDataTableRequest(this, pdContainer, i, this.value);
+                    var filterMap = new Map();
+                    if (pdContainer.filterMap === null) {
+                        pdContainer.filterMap = new Map();
+                    } else {
+                        filterMap.dict = pdContainer.filterMap;
+                    }
+                    filterMap.put(dtInfoList[i].field, this.value);
+                    pdContainer.filterMap = filterMap.dict;
+                    dataTableRequest(this, pdContainer);
                 }
             });
         });
@@ -85,7 +94,6 @@
                 var value = $.fn.dataTable.util.escapeRegex(
                     $(this).val()
                 );
-                setColumnValueAndRunDataTableRequest(this, pdContainer, i, value);
             });
         });
 
@@ -148,7 +156,7 @@
 	                        appDataTable.columns().every(function (i) {
 	                            $('input', this.footer()).on('change', function () {
 	                                if (daterangepicker !== undefined) {
-	                                    setColumnValueAndRunDataTableRequest(this, pdContainer, i, startPeriod + ':' + endPeriod);
+	                                    // setColumnValueAndRunDataTableRequest(this, pdContainer, i, startPeriod + ':' + endPeriod);
 	                                }
 	                            });
 	                        });
@@ -162,15 +170,14 @@
     	if (!tableForm.length) {
     		t.css('border-color', 'red');
     		alert('Please wrap highlighted table with form');
-    		return;
     	}
-    	if (!tableForm.find('input[type="submit"][class="internal-submit"]')) {
-    	    $('<input>').attr({
-    	        hidden: 'true',
-    	        type: 'submit',
-    	        class: 'internal-submit' 
-    	    }).appendTo(tableForm);
-    	}        
+    	// if (!tableForm.find('input[type="submit"][class="internal-submit"]')) {
+    	//     $('<input>').attr({
+    	//         hidden: 'true',
+    	//         type: 'submit',
+    	//         class: 'internal-submit'
+    	//     }).appendTo(tableForm);
+    	// }
     }
 
     function initColumnProperties(table) {
@@ -211,22 +218,36 @@
         return order;
     }
     
-    function renderFitlers(t, columnDefs) {
+    function renderFitlers(t, columnDefs, dtInfoList, pdContainer) {
     	var thead = t.find('thead');
     	var tfoot = t.find('tfoot');
-    	if (tfoot.length == 0) {
-    		t.append($('<tfoot></tfoot>'))
+    	if (tfoot.length === 0) {
+    		t.append($('<tfoot></tfoot>'));
     		tfoot = t.find('tfoot');
     	}
         thead.find('tr').clone(true).appendTo(tfoot);
         tfoot.find('tr>th').each( function (i) {
             var title = $(this).text();
-            $(this).html( '<input type="text" class="form-control" placeholder="Search '+title+'" />' );
-            $( 'input', this ).on( 'keyup change', function () {
-                if ( table.column(i).search() !== this.value ) {
-                    table.column(i).search( this.value ).draw();
+
+            if (pdContainer.filterMap !== null) {
+                var field = dtInfoList[i].field;
+                var filterMap = new Map();
+                filterMap.dict = pdContainer.filterMap;
+                var searchField = filterMap.get(field);
+                if (searchField !== undefined) {
+                    $(this).html( '<input type="text" class="form-control" value="'+searchField+'" />' );
+                } else {
+                    $(this).html( '<input type="text" class="form-control" placeholder="Search '+title+'" />' );
                 }
-            });
+            } else {
+                $(this).html( '<input type="text" class="form-control" placeholder="Search '+title+'" />' );
+            }
+
+            // $( 'input', this ).on( 'keyup change', function () {
+            //     if ( table.column(i).search() !== this.value ) {
+            //         table.column(i).search( this.value ).draw();
+            //     }
+            // });
         });	                   	
     }
     
@@ -342,17 +363,6 @@
             'This Month': [moment().startOf('month'), moment().endOf('month')],
             'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
         };
-    }
-
-    function setColumnValue(pdContainer, i, value) {
-        pdContainer.dataTablesInput.columns[i].search.value = value;
-        pdContainer.dataTablesInput.columns[i].search.regex = true;
-        pdContainer.dataTablesInput.columnsAsMap = null;
-    }
-
-    function setColumnValueAndRunDataTableRequest(thisVal, pdContainer, i, value) {
-        setColumnValue(pdContainer, i, value);
-        dataTableRequest(thisVal, pdContainer);
     }
 
 } ());

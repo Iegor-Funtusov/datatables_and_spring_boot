@@ -13,8 +13,10 @@ import org.springframework.ui.Model;
 import org.springframework.web.context.request.WebRequest;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 public abstract class EasyDatatablesListController<T> {
@@ -29,6 +31,7 @@ public abstract class EasyDatatablesListController<T> {
 
     protected String list(Model model, WebRequest webRequest) {
         PageData pageData = updatePageData(webRequest);
+        System.out.println("pageData = " + pageData);
         DataTablesOutput<T> dto = getDataTableRepository().findAll(toDataTablesInput(pageData));
         DataTablesUtil.updatePageData(pageData, dto.getRecordsFiltered());
         model.addAttribute(getListCode() + "List", dto.getData());
@@ -79,19 +82,30 @@ public abstract class EasyDatatablesListController<T> {
                 String fieldName = orderSplit[0];
                 String ascDesc = orderSplit[1];
                 List<Order> orders = Collections.singletonList(new Order(0, ascDesc));
-                Column column = new Column();
-                column.setSearchable(true);
-                column.setOrderable(true);
-                column.setData(fieldName);
-                column.setName("");
-                column.setSearch(new Search("", false));
-                List<Column> columns = Collections.singletonList(column);
-
+                List<Column> columns = Collections.singletonList(initColumns(fieldName, ""));
                 i.setOrder(orders);
                 i.setColumns(columns);
             }
         }
 
+        if (pd.getFilterMap() != null) {
+            List<Column> columns = new ArrayList<>();
+            for (Map.Entry<String, String> entry : pd.getFilterMap().entrySet()) {
+                columns.add(initColumns(entry.getKey(), entry.getValue()));
+            }
+            i.setColumns(columns);
+        }
+
         return i;
+    }
+
+    private Column initColumns(String columnName, String searchValue) {
+        Column column = new Column();
+        column.setSearchable(true);
+        column.setOrderable(true);
+        column.setData(columnName);
+        column.setName("");
+        column.setSearch(new Search(searchValue, false));
+        return column;
     }
 }
