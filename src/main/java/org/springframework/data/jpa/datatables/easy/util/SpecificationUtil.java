@@ -17,17 +17,13 @@ public class SpecificationUtil<T> {
 
     public Specification<T> generateFinishSpecification(Map<String, String> specificValueMap, Class<T> entityClass) {
         return (Specification<T>) (root, criteriaQuery, criteriaBuilder) -> {
-            List<Predicate> predicates = new ArrayList<>();
-            for (Map.Entry<String, String> entry : specificValueMap.entrySet()) {
-                predicates.addAll(generateSpecificationPredicates(entry.getKey(), entry.getValue(), entityClass, root, criteriaBuilder));
-            }
+            List<Predicate> predicates = new ArrayList<>(generateSpecificationPredicates(specificValueMap, entityClass, root, criteriaBuilder));
             return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
         };
     }
 
     private static List<Predicate> generateSpecificationPredicates(
-            String fieldName,
-            String fieldValue,
+            Map<String, String> specificValueMap,
             Class<?> entityClass,
             Root<?> root,
             CriteriaBuilder criteriaBuilder) {
@@ -37,12 +33,13 @@ public class SpecificationUtil<T> {
 
         for (Field field : getAllFieldsByEntity(entityClass)) {
             if (Modifier.isPrivate(field.getModifiers())) {
-                if (Objects.equals(field.getName(), fieldName)) {
+                String fieldValue = specificValueMap.get(field.getName());
+                if (fieldValue != null) {
                     List<Predicate> innerEntitiesPredicates = new ArrayList<>();
                     for (Field innerField : getAllFieldsByEntity(field.getType())) {
                         if (Modifier.isPrivate(innerField.getModifiers())) {
                             if (!field.getType().isPrimitive()) {
-                                if (innerField.getType().isAssignableFrom(String.class)) {
+                                if (String.class.isAssignableFrom(innerField.getType())) {
                                     containsLikePattern = getContainsLikePattern(fieldValue);
                                     innerEntitiesPredicates.add(criteriaBuilder.like(criteriaBuilder.lower(root.get(field.getName()).get(innerField.getName())), containsLikePattern));
                                 }
