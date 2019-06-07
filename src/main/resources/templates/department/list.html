@@ -21,16 +21,18 @@
                     <th dt-field="createTime">Create Time</th>
                     <th dt-field="updateTime">Update Time</th>
                     <th dt-field="name">Name</th>
-                    <th dt-field="employee.id" dt-orderable="false">emp</th>
+                    <th dt-field="employee.id" dt-orderable="false">Employees</th>
                 </tr>
                 </thead>
                 <tbody>
                 <tr th:each="department,iter : ${departmentList}" role="row" class="odd">
-                    <td th:text="${department.getId()}">id</td>
-                    <td th:text="${#dates.format(department.getCreateTime(), 'yyyy-MM-dd HH:mm:ss')}">Create Time</td>
-                    <td th:text="${#dates.format(department.getUpdateTime(), 'yyyy-MM-dd HH:mm:ss')}">Update Time</td>
-                    <td th:text="${department.getName()}">Name</td>
-                    <td class="details-control"></td>
+                    <td th:text="${department.id}">id</td>
+                    <td th:text="${#dates.format(department.createTime, 'yyyy-MM-dd HH:mm:ss')}">Create Time</td>
+                    <td th:text="${#dates.format(department.updateTime, 'yyyy-MM-dd HH:mm:ss')}">Update Time</td>
+                    <td th:text="${department.name}">Name</td>
+                    <td>
+                    	<a th:href="@{/employee/list/__('?filter_department.id='+${department.id})__&size=5&order=salary_desc&clear=1}">See top 5 by salary</a>
+                    </td>
                 </tr>
                 </tbody>
             </table>
@@ -39,15 +41,6 @@
 </div>
 
 <script >
-    function format ( d ) {
-        var id = String(d).split(',')[0];
-        return '<table cellpadding="5" cellspacing="0" border="0" style="padding-left:50px;">'+
-            '<tr>'+
-            '<td>Link:</td>'+
-            '<td>'+'<a href="[[@{/employee/list/}]]' + id + '">' + 'Employees' + '</a>'+'</td>'+
-            '</tr>'+
-            '</table>';
-    }
     function getAllEnums() {
         return null;
     }

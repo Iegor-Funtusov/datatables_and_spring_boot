@@ -1,27 +1,29 @@
 package org.springframework.data.jpa.datatables.easy.web;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.jpa.datatables.easy.data.PageData;
-import org.springframework.data.jpa.datatables.easy.data.SessionData;
-import org.springframework.data.jpa.datatables.easy.util.DataTablesUtil;
-import org.springframework.data.jpa.datatables.mapping.*;
-import org.springframework.data.jpa.datatables.repository.DataTablesRepository;
-import org.springframework.ui.Model;
-import org.springframework.web.context.request.WebRequest;
-
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-@Slf4j
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.datatables.easy.data.PageData;
+import org.springframework.data.jpa.datatables.easy.data.SessionData;
+import org.springframework.data.jpa.datatables.easy.util.DataTablesUtil;
+import org.springframework.data.jpa.datatables.mapping.Column;
+import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
+import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
+import org.springframework.data.jpa.datatables.mapping.Order;
+import org.springframework.data.jpa.datatables.mapping.Search;
+import org.springframework.data.jpa.datatables.repository.DataTablesRepository;
+import org.springframework.ui.Model;
+import org.springframework.web.context.request.WebRequest;
+
 public abstract class EasyDatatablesListController<T> {
 
-    private static final int DEFAULT_PAGE_SIZE = 10;
+    private static final String FILTER_PARAM_PREFIX = "filter_";
+
+	private static final int DEFAULT_PAGE_SIZE = 10;
 
     @Autowired
     protected SessionData sessionData;
@@ -32,7 +34,8 @@ public abstract class EasyDatatablesListController<T> {
 
     protected String list(Model model, WebRequest webRequest) {
         PageData pageData = updatePageData(webRequest);
-        DataTablesOutput<T> dto = getDataTableRepository().findAll(toDataTablesInput(pageData));
+        DataTablesInput dataTablesInput = toDataTablesInput(pageData);
+		DataTablesOutput<T> dto = getDataTableRepository().findAll(dataTablesInput);
         DataTablesUtil.updatePageData(pageData, dto.getRecordsFiltered());
         model.addAttribute(getListCode() + "List", dto.getData());
         model.addAttribute(getListCode() + "Page", pageData);
@@ -43,29 +46,29 @@ public abstract class EasyDatatablesListController<T> {
     }
 
     private PageData updatePageData(WebRequest webRequest) {
-        String pageDataParam = webRequest.getParameter("pageData");
-        if (StringUtils.isNotBlank(pageDataParam)) {
-            ObjectMapper mapper = new ObjectMapper();
-            try {
-                return mapper.readValue(pageDataParam, PageData.class);
-            } catch (IOException e) {
-                log.error("Failed to JSON serialize " + pageDataParam, e);
-                return PageData.getDefault();
-            }
-        } else {
-            PageData pd = getPageData();
-            String pageParam = webRequest.getParameter("page");
-            if (StringUtils.isNotBlank(pageParam)) {
-                int page = Integer.parseInt(pageParam);
-                pd.setPage(page);
-            }
-            String sizeParam = webRequest.getParameter("size");
-            if (StringUtils.isNotBlank(sizeParam)) {
-                int size = Integer.parseInt(sizeParam);
-                pd.setSize(size);
-            }
-            return pd;
+        PageData pd = getPageData();
+        if (webRequest.getParameter("clear") != null) {
+        	pd.clear();
         }
+        
+        String pageParam = webRequest.getParameter("page");
+        if (StringUtils.isNotBlank(pageParam)) {
+            int page = Integer.parseInt(pageParam);
+            pd.setPage(page);
+        }
+        String sizeParam = webRequest.getParameter("size");
+        if (StringUtils.isNotBlank(sizeParam)) {
+            int size = Integer.parseInt(sizeParam);
+            pd.setSize(size);
+        }
+        
+        Map<String, String[]> parameterMap = webRequest.getParameterMap();
+		for (String paramName : parameterMap.keySet()) {
+			if (paramName.startsWith(FILTER_PARAM_PREFIX)) {
+				pd.addFitlerValue(paramName.substring(FILTER_PARAM_PREFIX.length()),  parameterMap.get(paramName));
+			}
+		}
+        return pd;
     }
 
     private PageData getPageData() {

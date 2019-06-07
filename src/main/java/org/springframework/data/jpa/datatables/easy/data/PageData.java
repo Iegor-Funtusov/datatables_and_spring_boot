@@ -5,6 +5,7 @@ import lombok.Setter;
 import lombok.ToString;
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.Map;
 
 @Getter
@@ -15,11 +16,11 @@ public class PageData implements Serializable {
     private static final long serialVersionUID = -2954553322587783857L;
     private static final PageData DEFAULT = new PageData();
 
-    private int page = 1;
-    private int size = 10;
-    private long totalElements = 0;
-    private long displayStart = 1;
-    private long displayEnd = size;
+    private int page;
+    private int size;
+    private long totalElements;
+    private long displayStart;
+    private long displayEnd;
 
     /*
      * "title asc", "id desc"
@@ -31,7 +32,55 @@ public class PageData implements Serializable {
      */
     private Map<String, String> filterMap;
 
+    
+    public PageData() {
+    	this.clear();
+    }
+    
     public static PageData getDefault() {
         return DEFAULT;
     }
+
+	public void addFitlerValue(String fieldName, String[] values) {
+		if (values == null || values.length == 0) {
+			this.filterMap.remove(fieldName);
+		} else {
+			if (values.length == 1) {
+				if (values[0] != null) {
+					filterMap.put(fieldName, values[0].trim());
+				} else {
+					filterMap.remove(fieldName);
+				}
+			} else {
+				StringBuilder sb = new StringBuilder();
+				for (String string : values) {
+					if (string != null) {
+						if (sb.length() > 0) {
+							sb.append(",");
+						}
+						sb.append(string);
+					}
+				}
+				if (sb.length() > 0 ) {
+					filterMap.put(fieldName, sb.toString());
+				} else {
+					filterMap.remove(fieldName);
+				}
+			}
+		}
+	}
+
+	public void clear() {
+		this.page = 1;
+		this.size = 10;
+		this.totalElements = 0;
+		this.displayStart = 1;
+		this.displayEnd = this.size;
+	    this.order = null;
+	    this.filterMap = new HashMap<String, String>();
+	}
+
+	public void clearFilter() {
+		this.filterMap.clear();
+	}
 }
