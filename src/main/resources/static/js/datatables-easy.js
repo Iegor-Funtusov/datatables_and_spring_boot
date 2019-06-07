@@ -36,7 +36,7 @@
             order: [orderInfo.col, orderInfo.dir],
             columnDefs: columnDefs,
             displayStart: displayStart - 1,
-            dom: '<"d-flex justify-content-between"Bl>t<"d-flex justify-content-between"ip><"clear">',
+            dom: '<"d-flex justify-content-between"B>t<"row"><"d-flex justify-content-between"<"mt-2"l>ip><"clear">',
             preDrawCallback: function (settings) {
                 settings.oFeatures.bServerSide = "ssp";
                 settings.bDestroying = true;
