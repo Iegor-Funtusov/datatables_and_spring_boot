@@ -14,19 +14,19 @@
 
     function configureDataTable(table) {
         var t = $(table);
-        var pdContainer = getAttributeByPageDataContainer(t);
-        if (!pdContainer) {
+        var pageData = getAttributeByPageDataContainer(t);
+        if (!pageData) {
             console.log('Attribute with page data is not found on table ' + table);
             return false;
         }
-        console.log(pdContainer);
+        console.log(pageData);
         var columnDefs = buildColumnDefs(t);
-        var orderInfo = initOrders(columnDefs, pdContainer);
+        var orderInfo = initOrders(columnDefs, pageData);
 
-        var totalElements = pdContainer.totalElements;
-        var size = pdContainer.size;
-        var displayStart = pdContainer.displayStart;
-        var displayEnd = pdContainer.displayEnd;
+        var totalElements = pageData.totalElements;
+        var size = pageData.size;
+        var displayStart = pageData.displayStart;
+        var displayEnd = pageData.displayEnd;
 
         var dataTablesSettings = {
             colReorder: true,
@@ -36,7 +36,7 @@
             order: [orderInfo.col, orderInfo.dir],
             columnDefs: columnDefs,
             displayStart: displayStart - 1,
-            dom: '<"d-flex justify-content-between"B>t<"row"><"d-flex justify-content-between"<"mt-2"l>ip><"clear">',
+            dom: '<"d-flex justify-content-between">t<"row"><"d-flex justify-content-between"<"mt-2"l>ip><"clear">',
             preDrawCallback: function (settings) {
                 settings.oFeatures.bServerSide = "ssp";
                 settings.bDestroying = true;
@@ -52,23 +52,23 @@
             }
         };
 
-        renderFitlers(t, columnDefs, pdContainer);
+        renderFitlers(t, columnDefs, pageData);
 
         //configButtons(dataTablesSettings);
 
         var appDataTable = t
             .DataTable(dataTablesSettings)
             .on('order.dt', function (e, settings, order) {
-                pdContainer.order = columnDefs[order[0].col].field + '_' + order[0].dir;
-                dataTableRequest(this, pdContainer);
+                pageData.order = columnDefs[order[0].col].field + '_' + order[0].dir;
+                dataTableRequest(this, pageData);
             })
             .on('length.dt', function (e, settings, len) {
-                pdContainer.size = len;
-                dataTableRequest(this, pdContainer);
+                pageData.size = len;
+                dataTableRequest(this, pageData);
             })
             .on('page.dt', function () {
-                pdContainer.page = appDataTable.page.info().page + 1;
-                dataTableRequest(this, pdContainer);
+                pageData.page = appDataTable.page.info().page + 1;
+                dataTableRequest(this, pageData);
             });
 
         overrideButtonColor();
@@ -76,7 +76,7 @@
         appDataTable.columns().every(function (i) {
             $('input', this.footer()).on('keypress', function (event) {
                 if (event.keyCode === 13) {
-                    subscribeEventAndRequest(this, pdContainer, columnDefs[i].field, this.value);
+                    subscribeEventAndRequest(this, pageData, columnDefs[i].field, this.value);
                 }
             });
         });
@@ -84,7 +84,7 @@
         appDataTable.columns().every(function (i) {
             $('select', this.footer()).on('change', function () {
                 var value = $.fn.dataTable.util.escapeRegex($(this).val());
-                subscribeEventAndRequest(this, pdContainer, columnDefs[i].field, value);
+                subscribeEventAndRequest(this, pageData, columnDefs[i].field, value);
             });
         });
 
@@ -100,7 +100,7 @@
                 row.child.hide();
                 tr.removeClass('shown');
             } else {
-                row.child(format(row.data())).show();
+                row.child(detailCellFormat(row.data())).show();
                 tr.addClass('shown');
             }
         });
@@ -115,13 +115,13 @@
             var startPeriod;
             var endPeriod;
             appDataTable.columns().every(function (i) {
-                var column = pdContainer.dataTablesInput.columns[i];
+                var column = pageData.dataTablesInput.columns[i];
                 if (column !== undefined) {
                     var createTime = "createTime";
                     var updateTime = "updateTime";
-                    var columnData = pdContainer.dataTablesInput.columns[i].data;
+                    var columnData = pageData.dataTablesInput.columns[i].data;
                     if (columnData === createTime || columnData === updateTime) {
-                        var date = pdContainer.dataTablesInput.columns[i].search.value;
+                        var date = pageData.dataTablesInput.columns[i].search.value;
                         date = date.replace(/ /gi, '').split('-');
                         var period = new Date(date[0]);
                         startPeriod = moment(period);
@@ -146,7 +146,7 @@
                             appDataTable.columns().every(function (i) {
                                 $('input', this.footer()).on('change', function () {
                                     if (daterangepicker !== undefined) {
-                                        // setColumnValueAndRunDataTableRequest(this, pdContainer, i, startPeriod + ':' + endPeriod);
+                                        // setColumnValueAndRunDataTableRequest(this, pageData, i, startPeriod + ':' + endPeriod);
                                     }
                                 });
                             });
@@ -170,8 +170,8 @@
         // }
     }
 
-    function initOrders(columnDefs, pdContainer) {
-        var orderColDir = pdContainer.order;
+    function initOrders(columnDefs, pageData) {
+        var orderColDir = pageData.order;
         var order = {};
         if (orderColDir !== null) {
             var sort = orderColDir.split('_');
@@ -190,7 +190,7 @@
         return order;
     }
 
-    function renderFitlers(t, columnDefs, pdContainer) {
+    function renderFitlers(t, columnDefs, pageData) {
         var thead = t.find('thead');
         var tfoot = t.find('tfoot');
         if (tfoot.length === 0) {
@@ -204,10 +204,10 @@
             var type = columnDefs[i].type;
             var enums = getAllEnums();
 
-            if (pdContainer.filterMap !== null) {
+            if (pageData.filterMap !== null) {
                 if (isString(type)) {
                     var filterMap = new Map();
-                    filterMap.dict = pdContainer.filterMap;
+                    filterMap.dict = pageData.filterMap;
                     var searchField = filterMap.get(field);
                     if (searchField !== undefined) {
                         $(this).html('<input type="text" class="form-control" value="' + searchField + '" />');
@@ -254,16 +254,16 @@
         ownerSelect.appendChild(selectList);
     }
 
-    function subscribeEventAndRequest(ownerEvent, pdContainer, field, value) {
+    function subscribeEventAndRequest(ownerEvent, pageData, field, value) {
         var filterMap = new Map();
-        if (pdContainer.filterMap === null) {
-            pdContainer.filterMap = new Map();
+        if (pageData.filterMap === null) {
+            pageData.filterMap = new Map();
         } else {
-            filterMap.dict = pdContainer.filterMap;
+            filterMap.dict = pageData.filterMap;
         }
         filterMap.put(field, value);
-        pdContainer.filterMap = filterMap.dict;
-        dataTableRequest(ownerEvent, pdContainer);
+        pageData.filterMap = filterMap.dict;
+        dataTableRequest(ownerEvent, pageData);
     }
 
     function configButtons(dataTablesSettings) {
@@ -353,15 +353,15 @@
         return value;
     }
 
-    function dataTableRequest(owner, pdContainer) {
-        pdContainer = JSON.stringify(pdContainer);
+    function dataTableRequest(owner, pageData) {
+        pageData = JSON.stringify(pageData);
 
-        console.log('dt = ' + pdContainer);
+        console.log('dt = ' + pageData);
 
         $('<input>').attr({
             type: 'hidden',
             name: 'pageData',
-            value: pdContainer
+            value: pageData
         }).appendTo(owner);
 
         var button = document.createElement("button");
