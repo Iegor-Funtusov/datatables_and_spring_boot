@@ -248,7 +248,7 @@
         if (btns) {
             var kbButtons = btns.getElementsByTagName("button");
             for (var i = 0; i < kbButtons.length; i++) {
-                kbButtons[i].className = 'btn btn-primary m-2';
+                kbButtons[i].className = 'btn btn-primary m-1';
             }
         }
     }
