@@ -19,6 +19,13 @@
             console.log('Attribute with page data is not found on table ' + table);
             return false;
         }
+
+        var tableForm = t.closest('form');
+        if (!tableForm.length) {
+            t.css('border-color', 'red');
+            alert('Please wrap highlighted table with form');
+        }
+
         console.log(pageData);
         var columnDefs = buildColumnDefs(t);
         var orderInfo = initOrders(columnDefs, pageData);
@@ -36,7 +43,15 @@
             order: [orderInfo.col, orderInfo.dir],
             columnDefs: columnDefs,
             displayStart: displayStart - 1,
-            dom: '<"d-flex justify-content-between">t<"row"><"d-flex justify-content-between"<"mt-2"l>ip><"clear">',
+            buttons: [
+                {
+                    text: 'Clear',
+                    action: function ( e, dt, node, config ) {
+                        window.location.replace(window.location.pathname + '?clear=1');
+                    }
+                }
+            ],
+            dom: '<"d-flex justify-content-between">t<"row"><"d-flex justify-content-between"B<"mt-2"l>ip><"clear">',
             preDrawCallback: function (settings) {
                 settings.oFeatures.bServerSide = "ssp";
                 settings.bDestroying = true;
@@ -71,7 +86,8 @@
                 dataTableRequest(this, pageData);
             });
 
-        overrideButtonColor();
+        // overrideButtonColor();
+        overrideClearButtonStyle();
 
         appDataTable.columns().every(function (i) {
             $('input', this.footer()).on('keypress', function (event) {
@@ -91,19 +107,6 @@
         new $.fn.dataTable.FixedHeader(appDataTable, {
             headerOffset: 1
         });
-
-        var tableForm = t.closest('form');
-        if (!tableForm.length) {
-            t.css('border-color', 'red');
-            alert('Please wrap highlighted table with form');
-        }
-        // if (!tableForm.find('input[type="submit"][class="internal-submit"]')) {
-        //     $('<input>').attr({
-        //         hidden: 'true',
-        //         type: 'submit',
-        //         class: 'internal-submit'
-        //     }).appendTo(tableForm);
-        // }
     }
 
     function initOrders(columnDefs, pageData) {
@@ -236,6 +239,16 @@
             for (var i = 0; i < kbButtons.length; i++) {
                 kbButtons[i].style.backgroundColor = '#f8f9fa';
                 kbButtons[i].style.color = 'black';
+            }
+        }
+    }
+
+    function overrideClearButtonStyle() {
+        var btns = document.querySelector('div.dt-buttons.btn-group');
+        if (btns) {
+            var kbButtons = btns.getElementsByTagName("button");
+            for (var i = 0; i < kbButtons.length; i++) {
+                kbButtons[i].className = 'btn btn-primary m-2';
             }
         }
     }
