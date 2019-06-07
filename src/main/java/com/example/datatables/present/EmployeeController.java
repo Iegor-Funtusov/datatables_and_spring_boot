@@ -1,4 +1,4 @@
-package com.example.datatables.present.controller;
+package com.example.datatables.present;
 
 import com.example.datatables.persistence.entities.Employee;
 import com.example.datatables.persistence.enums.Position;

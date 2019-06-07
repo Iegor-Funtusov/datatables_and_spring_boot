@@ -1,4 +1,4 @@
-package com.example.datatables.present.controller;
+package com.example.datatables.present;
 
 import com.example.datatables.persistence.entities.Department;
 import com.example.datatables.persistence.repository.DepartmentDataTableRepository;
