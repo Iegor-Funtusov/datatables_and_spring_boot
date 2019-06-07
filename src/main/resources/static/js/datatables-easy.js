@@ -290,15 +290,48 @@
     }
 
     function dataTableRequest(owner, pageData) {
-        pageData = JSON.stringify(pageData);
 
-        console.log('dt = ' + pageData);
+        if (pageData.page !== null) {
+            console.log('page');
+            $('<input>').attr({
+                type: 'hidden',
+                name: 'page',
+                value: pageData.page
+            }).appendTo(owner);
+        }
 
-        $('<input>').attr({
-            type: 'hidden',
-            name: 'pageData',
-            value: pageData
-        }).appendTo(owner);
+        if (pageData.size !== null) {
+            console.log('size');
+            $('<input>').attr({
+                type: 'hidden',
+                name: 'size',
+                value: pageData.size
+            }).appendTo(owner);
+        }
+
+        if (pageData.order !== null) {
+            console.log('order');
+            $('<input>').attr({
+                type: 'hidden',
+                name: 'order',
+                value: pageData.order
+            }).appendTo(owner);
+        }
+
+        if (pageData.filterMap !== null) {
+            console.log('filter');
+            var filterMap = new Map();
+            var filter = 'filter_';
+            filterMap.dict = pageData.filterMap;
+            var objectKeys = $.map(pageData.filterMap, function(value, key) {return key;});
+            for (var key in objectKeys) {
+                $('<input>').attr({
+                    type: 'hidden',
+                    name: filter + objectKeys[key],
+                    value: filterMap.get(objectKeys[key])
+                }).appendTo(owner);
+            }
+        }
 
         var button = document.createElement("button");
         button.setAttribute('type', 'submit');

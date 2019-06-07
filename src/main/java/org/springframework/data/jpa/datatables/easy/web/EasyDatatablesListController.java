@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.datatables.easy.data.PageData;
@@ -22,7 +23,6 @@ import org.springframework.web.context.request.WebRequest;
 public abstract class EasyDatatablesListController<T> {
 
     private static final String FILTER_PARAM_PREFIX = "filter_";
-
 	private static final int DEFAULT_PAGE_SIZE = 10;
 
     @Autowired
@@ -61,11 +61,16 @@ public abstract class EasyDatatablesListController<T> {
             int size = Integer.parseInt(sizeParam);
             pd.setSize(size);
         }
+
+        String orderParam = webRequest.getParameter("order");
+        if (StringUtils.isNotBlank(sizeParam)) {
+            pd.setOrder(orderParam);
+        }
         
         Map<String, String[]> parameterMap = webRequest.getParameterMap();
 		for (String paramName : parameterMap.keySet()) {
 			if (paramName.startsWith(FILTER_PARAM_PREFIX)) {
-				pd.addFitlerValue(paramName.substring(FILTER_PARAM_PREFIX.length()),  parameterMap.get(paramName));
+				pd.addFilterValue(paramName.substring(FILTER_PARAM_PREFIX.length()),  parameterMap.get(paramName));
 			}
 		}
         return pd;
@@ -81,24 +86,27 @@ public abstract class EasyDatatablesListController<T> {
         i.setLength(pd.getSize());
         i.setStart(((pd.getPage() - 1) * pd.getSize()));
 
+        List<Column> columns = new ArrayList<>();
+
         if (StringUtils.isNotBlank(pd.getOrder())) {
             String[] orderSplit = pd.getOrder().split("_");
             if (orderSplit.length == 2 && "asc,desc".contains(orderSplit[1])) {
                 String fieldName = orderSplit[0];
                 String ascDesc = orderSplit[1];
                 List<Order> orders = Collections.singletonList(new Order(0, ascDesc));
-                List<Column> columns = Collections.singletonList(initColumns(fieldName, ""));
+                columns.add(initColumns(fieldName, ""));
                 i.setOrder(orders);
                 i.setColumns(columns);
             }
         }
 
         if (pd.getFilterMap() != null) {
-            List<Column> columns = new ArrayList<>();
             for (Map.Entry<String, String> entry : pd.getFilterMap().entrySet()) {
                 columns.add(initColumns(entry.getKey(), entry.getValue()));
             }
-            i.setColumns(columns);
+            if (CollectionUtils.isNotEmpty(columns)) {
+                i.setColumns(columns);
+            }
         }
 
         return i;

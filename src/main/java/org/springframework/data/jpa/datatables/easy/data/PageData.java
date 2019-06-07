@@ -41,7 +41,7 @@ public class PageData implements Serializable {
         return DEFAULT;
     }
 
-	public void addFitlerValue(String fieldName, String[] values) {
+	public void addFilterValue(String fieldName, String[] values) {
 		if (values == null || values.length == 0) {
 			this.filterMap.remove(fieldName);
 		} else {
