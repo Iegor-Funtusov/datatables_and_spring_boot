@@ -1,6 +1,9 @@
 package org.springframework.data.jpa.datatables.easy.util;
 
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.data.jpa.datatables.easy.data.DateData;
+import org.springframework.data.jpa.domain.Specification;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Predicate;
@@ -9,9 +12,63 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.*;
 
-public class SpecificationUtil {
+@Slf4j
+public class SpecificationUtil<T> {
 
-    public static List<Predicate> generateSpecificationPredicatesByDateRange(
+    public Specification<T> generateFinishSpecification(Map<String, String> specificValueMap, Class<T> entityClass) {
+        return (Specification<T>) (root, criteriaQuery, criteriaBuilder) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            for (Map.Entry<String, String> entry : specificValueMap.entrySet()) {
+                predicates.addAll(generateSpecificationPredicates(entry.getKey(), entry.getValue(), entityClass, root, criteriaBuilder));
+            }
+            return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
+        };
+    }
+
+    private static List<Predicate> generateSpecificationPredicates(
+            String fieldName,
+            String fieldValue,
+            Class<?> entityClass,
+            Root<?> root,
+            CriteriaBuilder criteriaBuilder) {
+
+        String containsLikePattern;
+        List<Predicate> predicates = new ArrayList<>();
+
+        for (Field field : getAllFieldsByEntity(entityClass)) {
+            if (Modifier.isPrivate(field.getModifiers())) {
+                if (Objects.equals(field.getName(), fieldName)) {
+                    List<Predicate> innerEntitiesPredicates = new ArrayList<>();
+                    for (Field innerField : getAllFieldsByEntity(field.getType())) {
+                        if (Modifier.isPrivate(innerField.getModifiers())) {
+                            if (!field.getType().isPrimitive()) {
+                                if (innerField.getType().isAssignableFrom(String.class)) {
+                                    containsLikePattern = getContainsLikePattern(fieldValue);
+                                    innerEntitiesPredicates.add(criteriaBuilder.like(criteriaBuilder.lower(root.get(field.getName()).get(innerField.getName())), containsLikePattern));
+                                }
+                                if (Long.class.isAssignableFrom(innerField.getType())) {
+                                    Long fieldNumber;
+                                    try {
+                                        fieldNumber = Long.parseLong(fieldValue);
+                                        innerEntitiesPredicates.add(criteriaBuilder.equal(root.get(field.getName()).get(innerField.getName()), fieldNumber));
+                                    } catch (NumberFormatException e) {
+                                        log.error("Failed parse long from string " + fieldValue, e);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    if (CollectionUtils.isNotEmpty(innerEntitiesPredicates)) {
+                        predicates.add(criteriaBuilder.or(innerEntitiesPredicates.toArray(new Predicate[0])));
+                    }
+                }
+            }
+        }
+
+        return predicates;
+    }
+
+    private static List<Predicate> generateSpecificationPredicatesByDateRange(
             List<DateData> dateModels,
             Class<?> entityClass,
             List<Predicate> predicates,
@@ -42,5 +99,13 @@ public class SpecificationUtil {
             nextClass = nextClass.getSuperclass();
         } while (Objects.nonNull(nextClass));
         return fields;
+    }
+
+    private static String getContainsLikePattern(String searchTerm) {
+        if (searchTerm == null || searchTerm.isEmpty()) {
+            return "%";
+        } else {
+            return "%" + searchTerm.toLowerCase() + "%";
+        }
     }
 }

@@ -1,16 +1,16 @@
 package org.springframework.data.jpa.datatables.easy.web;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.lang.reflect.ParameterizedType;
+import java.util.*;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.datatables.easy.data.DataTablesData;
 import org.springframework.data.jpa.datatables.easy.data.PageData;
 import org.springframework.data.jpa.datatables.easy.data.SessionData;
 import org.springframework.data.jpa.datatables.easy.util.DataTablesUtil;
+import org.springframework.data.jpa.datatables.easy.util.SpecificationUtil;
 import org.springframework.data.jpa.datatables.mapping.Column;
 import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
 import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
@@ -34,8 +34,15 @@ public abstract class EasyDatatablesListController<T> {
 
     protected String list(Model model, WebRequest webRequest) {
         PageData pageData = updatePageData(webRequest);
-        DataTablesInput dataTablesInput = toDataTablesInput(pageData);
-		DataTablesOutput<T> dto = getDataTableRepository().findAll(dataTablesInput);
+
+        DataTablesOutput<T> dto;
+        DataTablesData<T> data = toDataTablesInput(pageData);
+        if (data.getSpecification() == null) {
+            dto = getDataTableRepository().findAll(data.getInput());
+        } else {
+            dto = getDataTableRepository().findAll(data.getInput(), data.getSpecification());
+        }
+
         DataTablesUtil.updatePageData(pageData, dto.getRecordsFiltered());
         model.addAttribute(getListCode() + "List", dto.getData());
         model.addAttribute(getListCode() + "Page", pageData);
@@ -80,8 +87,9 @@ public abstract class EasyDatatablesListController<T> {
         return sessionData.getOrCreatePageData(this.getClass(), DEFAULT_PAGE_SIZE);
     }
 
-    private DataTablesInput toDataTablesInput(PageData pd) {
+    private DataTablesData<T> toDataTablesInput(PageData pd) {
         DataTablesInput i = new DataTablesInput();
+        Map<String, String> specificValueMap = new HashMap<>();
 
         i.setLength(pd.getSize());
         i.setStart(((pd.getPage() - 1) * pd.getSize()));
@@ -105,11 +113,28 @@ public abstract class EasyDatatablesListController<T> {
                 columns.add(initColumns(entry.getKey(), entry.getValue()));
             }
             if (CollectionUtils.isNotEmpty(columns)) {
+                for (Column column : columns) {
+                    if (column.getData().contains(".") && StringUtils.isNotBlank(column.getSearch().getValue())) {
+                        Search search = column.getSearch();
+                        String field = column.getData();
+                        String fieldName = field.substring(0, field.indexOf("."));
+                        specificValueMap.put(fieldName, search.getValue());
+                        search.setValue("");
+                    }
+                }
                 i.setColumns(columns);
             }
         }
 
-        return i;
+        DataTablesData<T> data = new DataTablesData<>();
+        data.setInput(i);
+        if (!specificValueMap.isEmpty()) {
+            data.setSpecification(
+                    new SpecificationUtil<T>().generateFinishSpecification(
+                            specificValueMap, (Class<T>) ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0]));
+        }
+
+        return data;
     }
 
     private Column initColumns(String columnName, String searchValue) {
