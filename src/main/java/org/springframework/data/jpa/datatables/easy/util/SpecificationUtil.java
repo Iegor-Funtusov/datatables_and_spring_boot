@@ -15,6 +15,8 @@ import java.util.*;
 @Slf4j
 public class SpecificationUtil<T> {
 
+    private static final String REGEX_VALID_NUM = "^[0-9]+$";
+
     public Specification<T> generateFinishSpecification(Map<String, String> specificValueMap, Class<T> entityClass) {
         return (Specification<T>) (root, criteriaQuery, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>(generateSpecificationPredicates(specificValueMap, entityClass, root, criteriaBuilder));
@@ -44,12 +46,13 @@ public class SpecificationUtil<T> {
                                     innerEntitiesPredicates.add(criteriaBuilder.like(criteriaBuilder.lower(root.get(field.getName()).get(innerField.getName())), containsLikePattern));
                                 }
                                 if (Long.class.isAssignableFrom(innerField.getType())) {
-                                    Long fieldNumber;
-                                    try {
-                                        fieldNumber = Long.parseLong(fieldValue);
+                                    if (fieldValue.matches(REGEX_VALID_NUM)) {
+                                        try {
+                                            Long fieldNumber = Long.parseLong(fieldValue);
                                         innerEntitiesPredicates.add(criteriaBuilder.equal(root.get(field.getName()).get(innerField.getName()), fieldNumber));
-                                    } catch (NumberFormatException e) {
-                                        log.error("Failed parse long from string " + fieldValue, e);
+                                        } catch (NumberFormatException e) {
+                                            log.error("Failed parse long from string " + fieldValue, e);
+                                        }
                                     }
                                 }
                             }
