@@ -34,6 +34,12 @@
         var size = pageData.size;
         var displayStart = pageData.displayStart;
         var displayEnd = pageData.displayEnd;
+        var filterMap = new Map();
+        if (pageData.filterMap === null) {
+            pageData.filterMap = new Map();
+        } else {
+            filterMap.dict = pageData.filterMap;
+        }
 
         var dataTablesSettings = {
             colReorder: true,
@@ -67,7 +73,7 @@
             }
         };
 
-        renderFitlers(t, columnDefs, pageData);
+        renderFilters(t, columnDefs, filterMap);
 
         //configButtons(dataTablesSettings);
 
@@ -92,7 +98,7 @@
         appDataTable.columns().every(function (i) {
             $('input', this.footer()).on('keypress', function (event) {
                 if (event.keyCode === 13) {
-                    subscribeEventAndRequest(this, pageData, columnDefs[i].field, this.value);
+                    doFilterAndRequest(this, pageData, filterMap, columnDefs[i].field, this.value);
                 }
             });
         });
@@ -100,7 +106,7 @@
         appDataTable.columns().every(function (i) {
             $('select', this.footer()).on('change', function () {
                 var value = $.fn.dataTable.util.escapeRegex($(this).val());
-                subscribeEventAndRequest(this, pageData, columnDefs[i].field, value);
+                doFilterAndRequest(this, pageData, filterMap, columnDefs[i].field, value);
             });
         });
 
@@ -129,7 +135,7 @@
         return order;
     }
 
-    function renderFitlers(t, columnDefs, pageData) {
+    function renderFilters(t, columnDefs, filterMap) {
         var thead = t.find('thead');
         var tfoot = t.find('tfoot');
         if (tfoot.length === 0) {
@@ -142,30 +148,21 @@
             var field = columnDefs[i].field;
             var type = columnDefs[i].type;
             var enums = getAllEnums();
+            var searchValue = filterMap.get(field);
 
-            if (pageData.filterMap !== null) {
-                if (isString(type)) {
-                    var filterMap = new Map();
-                    filterMap.dict = pageData.filterMap;
-                    var searchField = filterMap.get(field);
-                    if (searchField !== undefined) {
-                        $(this).html('<input type="text" class="form-control" value="' + searchField + '" />');
-                    } else {
-                        $(this).html('<input type="text" class="form-control" placeholder="Search ' + title + '" />');
-                    }
-                }
-                if (isEnum(type)) {
-                    if (enums.hasOwnProperty(field)) {
-                        initEnums(this, enums[field]);
-                    }
-                }
-            } else {
-                if (isString(type)) {
+            if (isString(type)) {
+                if (searchValue !== undefined) {
+                    $(this).html('<input type="text" class="form-control" value="' + searchValue + '" />');
+                } else {
                     $(this).html('<input type="text" class="form-control" placeholder="Search ' + title + '" />');
                 }
-                if (isEnum(type)) {
-                    if (enums.hasOwnProperty(field)) {
-                        initEnums(this, enums[field]);
+            }
+            if (isEnum(type)) {
+                if (enums.hasOwnProperty(field)) {
+                    if (searchValue !== undefined) {
+                        initEnums(this, enums[field], searchValue);
+                    } else {
+                        initEnums(this, enums[field], null);
                     }
                 }
             }
@@ -180,26 +177,51 @@
         return type === 'enum';
     }
 
-    function initEnums(ownerSelect, e) {
+    function initEnums(ownerSelect, e, searchValue) {
         var selectList = document.createElement("select");
         selectList.setAttribute('class', 'form-control');
-        for (var val in e) {
-            var option = document.createElement("option");
-            option.value = e[val];
-            option.text = e[val];
-            selectList.appendChild(option);
+        if (searchValue !== null) {
+            if (e.indexOf(searchValue) > -1) {
+                var option = document.createElement("option");
+                option.value = searchValue;
+                option.text = searchValue;
+                selectList.appendChild(option);
+                option = document.createElement("option");
+                option.value = "";
+                option.text = "ALL";
+                selectList.appendChild(option);
+                for (var val in e) {
+                    if (e[val] !== searchValue) {
+                        option = document.createElement("option");
+                        option.value = e[val];
+                        option.text = e[val];
+                        selectList.appendChild(option);
+                    }
+                }
+            } else {
+                initDefaultEnums(selectList, e);
+            }
+        } else {
+            initDefaultEnums(selectList, e);
         }
         ownerSelect.innerText = '';
         ownerSelect.appendChild(selectList);
     }
 
-    function subscribeEventAndRequest(ownerEvent, pageData, field, value) {
-        var filterMap = new Map();
-        if (pageData.filterMap === null) {
-            pageData.filterMap = new Map();
-        } else {
-            filterMap.dict = pageData.filterMap;
+    function initDefaultEnums(selectList, e) {
+        var option = document.createElement("option");
+        option.value = "";
+        option.text = "ALL";
+        selectList.appendChild(option);
+        for (var val in e) {
+            option = document.createElement("option");
+            option.value = e[val];
+            option.text = e[val];
+            selectList.appendChild(option);
         }
+    }
+
+    function doFilterAndRequest(ownerEvent, pageData, filterMap, field, value) {
         filterMap.put(field, value);
         pageData.filterMap = filterMap.dict;
         dataTableRequest(ownerEvent, pageData);
@@ -305,7 +327,6 @@
     function dataTableRequest(owner, pageData) {
 
         if (pageData.page !== null) {
-            console.log('page');
             $('<input>').attr({
                 type: 'hidden',
                 name: 'page',
@@ -314,7 +335,6 @@
         }
 
         if (pageData.size !== null) {
-            console.log('size');
             $('<input>').attr({
                 type: 'hidden',
                 name: 'size',
@@ -323,7 +343,6 @@
         }
 
         if (pageData.order !== null) {
-            console.log('order');
             $('<input>').attr({
                 type: 'hidden',
                 name: 'order',
@@ -332,7 +351,6 @@
         }
 
         if (pageData.filterMap !== null) {
-            console.log('filter');
             var filterMap = new Map();
             var filter = 'filter_';
             filterMap.dict = pageData.filterMap;
