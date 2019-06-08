@@ -3,7 +3,8 @@
     dataTablesEasy = {};
 
     dataTablesEasy.config = {
-        tableClass: 'datatables-easy'
+        tableClass: 'datatables-easy',
+        withButtonsClass: 'dt-with-buttons'
     };
 
     dataTablesEasy.init = function () {
@@ -24,9 +25,9 @@
         if (!tableForm.length) {
             t.css('border-color', 'red');
             alert('Please wrap highlighted table with form');
+            return;
         }
 
-        console.log(pageData);
         var columnDefs = buildColumnDefs(t);
         var orderInfo = initOrders(columnDefs, pageData);
 
@@ -75,7 +76,9 @@
 
         renderFilters(t, columnDefs, filterMap);
 
-        //configButtons(dataTablesSettings);
+        if (t.hasClass(dataTablesEasy.config.withButtonsClass)) {
+        	configButtons(dataTablesSettings);
+        }
 
         var appDataTable = t
             .DataTable(dataTablesSettings)
