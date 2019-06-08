@@ -1,9 +1,12 @@
 package org.springframework.data.jpa.datatables.easy.web;
 
 import java.lang.reflect.ParameterizedType;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.datatables.easy.data.DataTablesData;
@@ -31,7 +34,9 @@ public abstract class EasyDatatablesListController<T> {
 
 	protected abstract String getListCode();
 
-	protected abstract Map<String, List<Enum<?>>> getListEnumsField();
+	protected Map<String, List<Enum<?>>> getListEnumsField() {
+		return null;
+	}
 
 	protected abstract DataTablesRepository<T, Long> getDataTableRepository();
 
@@ -49,8 +54,10 @@ public abstract class EasyDatatablesListController<T> {
 		DataTablesUtil.updatePageData(pageData, dto.getRecordsFiltered());
 		model.addAttribute(getListCode() + "List", dto.getData());
 		model.addAttribute(getListCode() + "Page", pageData);
-		if (!getListEnumsField().isEmpty()) {
-			model.addAttribute("enums", getListEnumsField());
+
+		Map<String, List<Enum<?>>> listEnumsField = getListEnumsField();
+		if (!listEnumsField.isEmpty()) {
+			model.addAttribute("enums", listEnumsField);
 		}
 		return "/" + getListCode() + "/list";
 	}
@@ -115,7 +122,7 @@ public abstract class EasyDatatablesListController<T> {
 			for (Map.Entry<String, String> entry : pd.getFilterMap().entrySet()) {
 				columns.add(initColumns(entry.getKey(), entry.getValue()));
 			}
-			if (CollectionUtils.isNotEmpty(columns)) {
+			if (!columns.isEmpty()) {
 				for (Column column : columns) {
 					if (column.getData().contains(".") && StringUtils.isNotBlank(column.getSearch().getValue())) {
 						Search search = column.getSearch();
