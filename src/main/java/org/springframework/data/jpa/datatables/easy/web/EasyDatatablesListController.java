@@ -35,7 +35,7 @@ public abstract class EasyDatatablesListController<T> {
 	protected abstract String getListCode();
 
 	protected Map<String, List<Enum<?>>> getListEnumsField() {
-		return null;
+		return Collections.emptyMap();
 	}
 
 	protected abstract DataTablesRepository<T, Long> getDataTableRepository();
