@@ -143,14 +143,20 @@
             tfoot = t.find('tfoot');
         }
         thead.find('tr').clone(true).appendTo(tfoot);
+        
+        var enums = {};
+        try {
+        	enums = getAllEnums();
+        } catch (err){
+        }
+        
         tfoot.find('tr>th').each(function (i) {
             var title = $(this).text();
             var field = columnDefs[i].field;
             var type = columnDefs[i].type;
-            var enums = getAllEnums();
             var searchValue = filterMap.get(field);
 
-            if (isString(type)) {
+            if (!type || isString(type)) {
                 if (searchValue !== undefined) {
                     $(this).html('<input type="text" class="form-control" value="' + searchValue + '" />');
                 } else {
