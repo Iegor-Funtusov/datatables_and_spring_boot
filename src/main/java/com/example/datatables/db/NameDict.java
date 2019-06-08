@@ -49,7 +49,7 @@ public class NameDict {
     }
 
     private String getRandomSetValue(Set<String> set) {
-        int index = (int) Math.round(Math.random() * set.size());
+        int index = (int) Math.floor(Math.random() * set.size());
         Iterator<String> iterator = set.iterator();
         String res = "";
         for (int i = 0; i < index; i++) {

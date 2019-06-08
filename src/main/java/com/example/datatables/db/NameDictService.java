@@ -27,7 +27,7 @@ public class NameDictService {
 
     @Bean
     public NameDict loadNameDict() throws IOException {
-        return loadNameDict(true);
+        return loadNameDict(false);
     }
 
     private NameDict loadNameDict(boolean toUpperCase) throws IOException {

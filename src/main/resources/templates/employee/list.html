@@ -17,8 +17,8 @@
                th:attr="dt-page=${T(org.springframework.data.jpa.datatables.easy.util.JsonUtil).json(employeePage)}">
             <thead>
             <tr>
-                <th dt-field="id" dt-type="number">id</th>
-                <th dt-field="createTime" dt-type="date">Create Time</th>
+                <th dt-field="id" dt-type="number">#</th>
+                <th dt-field="createTime" dt-type="date">Hired</th>
                 <th dt-field="position" dt-type="enum">Position</th>
                 <th dt-field="firstName" dt-type="string">First Name</th>
                 <th dt-field="lastName" dt-type="string">Last Name</th>
@@ -29,11 +29,11 @@
             <tbody>
             <tr th:each="employee,iter : ${employeeList}">
                 <td th:text="${employee.getId()}">id</td>
-                <td th:text="${#dates.format(employee.getCreateTime(), 'yyyy-MM-dd HH:mm:ss')}">Create Time</td>
+                <td th:text="${#dates.format(employee.getCreateTime(), 'dd-MM-yyyy')}">25-12-2017</td>
                 <td th:text="${employee.getPosition()}">Position</td>
                 <td th:text="${employee.getFirstName()}">FirstName</td>
                 <td th:text="${employee.getLastName()}">LastName</td>
-                <td th:text="${employee.getSalary()}">Salary</td>
+                <td th:text="${#numbers.formatDecimal(employee.getSalary(), 3, 'POINT', 2, 'COMMA')}">Salary</td>
                 <td th:text="${employee.getDepartment().getId()} + ' : ' + ${employee.getDepartment().getName()}">Name</td>
             </tr>
             </tbody>
