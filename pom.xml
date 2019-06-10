@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>com.example</groupId>
 	<artifactId>datatables</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>1.0.0</version>
 	<name>datatables</name>
 	<description>Demo project for Spring Boot</description>
 
@@ -77,8 +77,22 @@
 		</dependency>
 	</dependencies>
 
+	<profiles>
+		<profile>
+			<id>datatables-easy</id>
+			<build>
+				<finalName>datatables-easy-${version}</finalName>
+				<resources>
+					<resource>
+						<directory>src/main/resources</directory>
+					</resource>
+				</resources>
+			</build>
+		</profile>
+	</profiles>
+
 	<build>
-		<finalName>dt</finalName>
+		<finalName>datatables-easy-demo</finalName>
 		<plugins>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
