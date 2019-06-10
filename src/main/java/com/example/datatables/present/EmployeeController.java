@@ -4,6 +4,8 @@ import com.example.datatables.persistence.entities.Employee;
 import com.example.datatables.persistence.enums.Position;
 import com.example.datatables.persistence.repository.EmployeeDataTableRepository;
 
+import com.example.datatables.service.EasyDatatablesListServiceImpl;
+import org.springframework.data.jpa.datatables.easy.service.EasyDatatablesListService;
 import org.springframework.data.jpa.datatables.easy.web.EasyDatatablesListController;
 import org.springframework.data.jpa.datatables.repository.DataTablesRepository;
 import org.springframework.stereotype.Controller;
@@ -20,9 +22,11 @@ import java.util.*;
 public class EmployeeController extends EasyDatatablesListController<Employee> {
 
     private final EmployeeDataTableRepository employeeDataTableRepository;
+    private final EasyDatatablesListServiceImpl<Employee> employeeEasyDatatablesListService;
 
-    public EmployeeController(EmployeeDataTableRepository employeeDataTableRepository) {
+    public EmployeeController(EmployeeDataTableRepository employeeDataTableRepository, EasyDatatablesListServiceImpl<Employee> employeeEasyDatatablesListService) {
         this.employeeDataTableRepository = employeeDataTableRepository;
+        this.employeeEasyDatatablesListService = employeeEasyDatatablesListService;
     }
 
     @GetMapping("/list")
@@ -45,6 +49,11 @@ public class EmployeeController extends EasyDatatablesListController<Employee> {
     @Override
     protected DataTablesRepository<Employee, Long> getDataTableRepository() {
         return this.employeeDataTableRepository;
+    }
+
+    @Override
+    protected EasyDatatablesListService<Employee> getEasyDatatablesListService() {
+        return this.employeeEasyDatatablesListService;
     }
 
     private void preInitModel(Model model) {

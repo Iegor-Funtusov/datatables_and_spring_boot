@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.datatables.easy.data.DataTablesData;
 import org.springframework.data.jpa.datatables.easy.data.PageData;
 import org.springframework.data.jpa.datatables.easy.data.SessionData;
+import org.springframework.data.jpa.datatables.easy.service.EasyDatatablesListService;
 import org.springframework.data.jpa.datatables.easy.util.DataTablesUtil;
 import org.springframework.data.jpa.datatables.easy.util.SpecificationUtil;
 import org.springframework.data.jpa.datatables.mapping.Column;
@@ -35,21 +36,18 @@ public abstract class EasyDatatablesListController<T> {
 	protected abstract String getListCode();
 
 	protected abstract DataTablesRepository<T, Long> getDataTableRepository();
+	protected abstract EasyDatatablesListService<T> getEasyDatatablesListService();
 
 	protected String list(Model model, WebRequest webRequest) {
 		PageData pageData = updatePageData(webRequest);
 
 		DataTablesOutput<T> dto;
-		DataTablesData<T> data = toDataTablesInput(pageData);
-		try {
-			if (data.getSpecification() == null) {
-				dto = getDataTableRepository().findAll(data.getInput());
-			} else {
-				dto = getDataTableRepository().findAll(data.getInput(), data.getSpecification());
-			}
-		} catch (Exception e) {
-			pageData.clear();
-			dto = new DataTablesOutput<>();
+		if (getDataTableRepository() != null) {
+			DataTablesData<T> data = toDataTablesInput(pageData);
+			dto = getEasyDatatablesListService().getDataTablesOutput(data, getDataTableRepository());
+		} else {
+			// this implementation does not use jpa
+			dto = getEasyDatatablesListService().getDataTablesOutput(pageData);
 		}
 
 		DataTablesUtil.updatePageData(pageData, dto.getRecordsFiltered());

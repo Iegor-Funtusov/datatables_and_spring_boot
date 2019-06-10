@@ -3,6 +3,8 @@ package com.example.datatables.present;
 import com.example.datatables.persistence.entities.Department;
 import com.example.datatables.persistence.repository.DepartmentDataTableRepository;
 
+import com.example.datatables.service.EasyDatatablesListServiceImpl;
+import org.springframework.data.jpa.datatables.easy.service.EasyDatatablesListService;
 import org.springframework.data.jpa.datatables.easy.web.EasyDatatablesListController;
 import org.springframework.data.jpa.datatables.repository.DataTablesRepository;
 import org.springframework.stereotype.Controller;
@@ -17,9 +19,11 @@ import org.springframework.web.context.request.WebRequest;
 public class DepartmentController extends EasyDatatablesListController<Department> {
 
     private final DepartmentDataTableRepository departmentDataTableRepository;
+    private final EasyDatatablesListServiceImpl<Department> departmentEasyDatatablesListService;
 
-    public DepartmentController(DepartmentDataTableRepository departmentDataTableRepository) {
+    public DepartmentController(DepartmentDataTableRepository departmentDataTableRepository, EasyDatatablesListServiceImpl<Department> departmentEasyDatatablesListService) {
         this.departmentDataTableRepository = departmentDataTableRepository;
+        this.departmentEasyDatatablesListService = departmentEasyDatatablesListService;
     }
 
     @GetMapping("/list")
@@ -40,5 +44,10 @@ public class DepartmentController extends EasyDatatablesListController<Departmen
     @Override
     protected DataTablesRepository<Department, Long> getDataTableRepository() {
         return this.departmentDataTableRepository;
+    }
+
+    @Override
+    protected EasyDatatablesListService<Department> getEasyDatatablesListService() {
+        return this.departmentEasyDatatablesListService;
     }
 }
