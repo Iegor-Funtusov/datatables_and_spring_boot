@@ -34,10 +34,6 @@ public abstract class EasyDatatablesListController<T> {
 
 	protected abstract String getListCode();
 
-	protected Map<String, List<Enum<?>>> getListEnumsField() {
-		return Collections.emptyMap();
-	}
-
 	protected abstract DataTablesRepository<T, Long> getDataTableRepository();
 
 	protected String list(Model model, WebRequest webRequest) {
@@ -45,20 +41,21 @@ public abstract class EasyDatatablesListController<T> {
 
 		DataTablesOutput<T> dto;
 		DataTablesData<T> data = toDataTablesInput(pageData);
-		if (data.getSpecification() == null) {
-			dto = getDataTableRepository().findAll(data.getInput());
-		} else {
-			dto = getDataTableRepository().findAll(data.getInput(), data.getSpecification());
+		try {
+			if (data.getSpecification() == null) {
+				dto = getDataTableRepository().findAll(data.getInput());
+			} else {
+				dto = getDataTableRepository().findAll(data.getInput(), data.getSpecification());
+			}
+		} catch (Exception e) {
+			pageData.clear();
+			dto = new DataTablesOutput<>();
 		}
 
 		DataTablesUtil.updatePageData(pageData, dto.getRecordsFiltered());
 		model.addAttribute(getListCode() + "List", dto.getData());
 		model.addAttribute(getListCode() + "Page", pageData);
 
-		Map<String, List<Enum<?>>> listEnumsField = getListEnumsField();
-		if (!listEnumsField.isEmpty()) {
-			model.addAttribute("enums", listEnumsField);
-		}
 		return "/" + getListCode() + "/list";
 	}
 

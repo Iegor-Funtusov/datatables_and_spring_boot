@@ -12,10 +12,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.context.request.WebRequest;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-
 @Controller
 @RequestMapping("/department")
 public class DepartmentController extends EasyDatatablesListController<Department> {
@@ -39,11 +35,6 @@ public class DepartmentController extends EasyDatatablesListController<Departmen
     @Override
     protected String getListCode() {
         return "department";
-    }
-
-    @Override
-    protected Map<String, List<Enum<?>>> getListEnumsField() {
-        return Collections.emptyMap();
     }
 
     @Override

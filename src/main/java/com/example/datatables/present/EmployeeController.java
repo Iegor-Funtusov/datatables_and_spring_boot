@@ -19,7 +19,6 @@ import java.util.*;
 @RequestMapping("/employee")
 public class EmployeeController extends EasyDatatablesListController<Employee> {
 
-    private Map<String, List<Enum<?>>> enums;
     private final EmployeeDataTableRepository employeeDataTableRepository;
 
     public EmployeeController(EmployeeDataTableRepository employeeDataTableRepository) {
@@ -28,11 +27,13 @@ public class EmployeeController extends EasyDatatablesListController<Employee> {
 
     @GetMapping("/list")
     public String list(Model model, WebRequest webRequest) {
+        preInitModel(model);
         return super.list(model, webRequest);
     }
 
     @PostMapping("/list")
     public String listData(Model model, WebRequest webRequest) {
+        preInitModel(model);
         return super.list(model, webRequest);
     }
 
@@ -42,16 +43,11 @@ public class EmployeeController extends EasyDatatablesListController<Employee> {
     }
 
     @Override
-    protected Map<String, List<Enum<?>>> getListEnumsField() {
-        if (enums == null) {
-            enums = new HashMap<>();
-            enums.put("position", Arrays.asList(Position.values()));
-        }
-        return enums;
-    }
-
-    @Override
     protected DataTablesRepository<Employee, Long> getDataTableRepository() {
         return this.employeeDataTableRepository;
+    }
+
+    private void preInitModel(Model model) {
+        model.addAttribute("positionEnums", Arrays.asList(Position.values()));
     }
 }

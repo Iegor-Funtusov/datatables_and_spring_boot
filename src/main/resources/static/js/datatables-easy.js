@@ -146,47 +146,35 @@
             tfoot = t.find('tfoot');
         }
         thead.find('tr').clone(true).appendTo(tfoot);
-        
-        var enums = {};
-        try {
-        	enums = getAllEnums();
-        } catch (err){
-        }
-        
+
         tfoot.find('tr>th').each(function (i) {
             var title = $(this).text();
             var field = columnDefs[i].field;
             var type = columnDefs[i].type;
+            var enums = columnDefs[i].enum;
+            var searchable = columnDefs[i].searchable;
             var searchValue = filterMap.get(field);
 
-            if (!type || isString(type)) {
-                if (searchValue !== undefined) {
-                    $(this).html('<input type="text" class="form-control" value="' + searchValue + '" />');
-                } else {
-                    $(this).html('<input type="text" class="form-control" placeholder="Search ' + title + '" />');
-                }
-            }
-            if (isEnum(type)) {
-                if (enums.hasOwnProperty(field)) {
+            if (searchable) {
+                if (enums !== undefined) {
                     if (searchValue !== undefined) {
-                        initEnums(this, enums[field], searchValue);
+                        initEnums(this, enums, searchValue);
                     } else {
-                        initEnums(this, enums[field], null);
+                        initEnums(this, enums, null);
+                    }
+                } else {
+                    if (searchValue !== undefined) {
+                        $(this).html('<input type="text" class="form-control" value="' + searchValue + '" />');
+                    } else {
+                        $(this).html('<input type="text" class="form-control" placeholder="Search ' + title + '" />');
                     }
                 }
             }
         });
     }
 
-    function isString(type) {
-        return type === 'string';
-    }
-
-    function isEnum(type) {
-        return type === 'enum';
-    }
-
     function initEnums(ownerSelect, e, searchValue) {
+        e = eval(e);
         var selectList = document.createElement("select");
         selectList.setAttribute('class', 'form-control');
         if (searchValue !== null) {
