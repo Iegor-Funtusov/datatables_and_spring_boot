@@ -35,11 +35,11 @@
         var size = pageData.size;
         var displayStart = pageData.displayStart;
         var displayEnd = pageData.displayEnd;
-        var filterMap = new Map();
+        var filterMap = {};
         if (pageData.filterMap === null) {
-            pageData.filterMap = new Map();
+            pageData.filterMap = filterMap;
         } else {
-            filterMap.dict = pageData.filterMap;
+            filterMap = pageData.filterMap;
         }
 
         var dataTablesSettings = {
@@ -153,7 +153,7 @@
             var type = columnDefs[i].type;
             var enums = columnDefs[i].enum;
             var searchable = columnDefs[i].searchable;
-            var searchValue = filterMap.get(field);
+            var searchValue = filterMap[field];
 
             if (searchable) {
                 if (enums !== undefined) {
@@ -219,8 +219,8 @@
     }
 
     function doFilterAndRequest(ownerEvent, pageData, filterMap, field, value) {
-        filterMap.put(field, value);
-        pageData.filterMap = filterMap.dict;
+        filterMap[field] = value;
+        pageData.filterMap = filterMap;
         dataTableRequest(ownerEvent, pageData);
     }
 
@@ -348,15 +348,15 @@
         }
 
         if (pageData.filterMap !== null) {
-            var filterMap = new Map();
+
             var filter = 'filter_';
-            filterMap.dict = pageData.filterMap;
+
             var objectKeys = $.map(pageData.filterMap, function(value, key) {return key;});
             for (var key in objectKeys) {
                 $('<input>').attr({
                     type: 'hidden',
                     name: filter + objectKeys[key],
-                    value: filterMap.get(objectKeys[key])
+                    value: pageData.filterMap[objectKeys[key]]
                 }).appendTo(owner);
             }
         }
